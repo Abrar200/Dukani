@@ -1,0 +1,94 @@
+{% extends "business/base.html" %}
+
+{% load static %}
+
+{% block slider %}
+
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Message</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href='index-2.html'>Homepage</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Message {{ business.business_name }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock slider %}
+
+{% block content %}
+
+<main class="content mt-5 mb-5">
+    <div class="container p-0">
+        <h1 class="h3 mb-3">Your Messages</h1>
+
+        <div class="card">
+            <div class="row g-0">
+                <div class="col-12 col-lg-5 col-xl-3 border-right">
+                    {% for message in user_messages %}
+                    <a href="{% url 'user_messages' %}?business_slug={{ message.business.business_slug }}" class="list-group-item list-group-item-action border-0">
+                        <div class="badge bg-success float-right">{{ individual_business_message_counter }}</div>
+                        <div class="d-flex align-items-start">
+                            <img src="{{ message.business.profile_picture.url }}" class="rounded-circle mr-1" width="40px" height="40px">
+                            <div class="flex-grow-1 ml-3">
+                                {{ message.business.business_name }}
+                                {% if message.last_message %}
+                                <div class="small">{{ message.last_message.content }}</div>
+                                {% else %}
+                                <p>No messages yet.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    <hr class="d-block d-lg-none mt-1 mb-0">
+                </div>
+                {% if selected_business %}
+                <div class="col-12 col-lg-7 col-xl-9">
+                    <div class="py-2 px-4 border-bottom d-none d-lg-block">
+                        <div class="d-flex align-items-center py-1">
+                            <div class="position-relative">
+                                <img src="{{ selected_business.profile_picture.url }}" class="rounded-circle mr-1" alt="{{ selected_business.business_name }}" width="40" height="40">
+                            </div>
+                            <div class="flex-grow-1 pl-3">
+                                <strong>{{ selected_business.business_name }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="position-relative">
+                        <h1 class="text-2xl font-bold mb-4">No Messages</h1>
+                        <p>You have no messages with this business yet.</p>
+                        <a href="{% url 'user_messages' %}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Go to Messages
+                        </a>
+                    </div>
+
+                    {% if request.user.is_authenticated %}
+                    <form method="post" action="{% url 'user_messages' %}?business_slug={{ selected_business.business_slug }}">
+                        {% csrf_token %}
+                        <div class="flex-grow-0 py-3 px-4 border-top">
+                            <div class="input-group">
+                                <input name="content" type="text" class="form-control" placeholder="Type your message">
+                                <button class="btn btn-primary">Send</button>
+                            </div>
+                        </div>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock content %}

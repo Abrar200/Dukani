@@ -1,0 +1,21 @@
+{
+  "detectedConfig": {
+    "typescript": false,
+    "naming": "Kebab Case",
+    "unit": "px",
+    "framework": "html-css",
+    "styling": "CSS"
+  },
+  "locofyConfig": {
+    "project": "FrothApps",
+    "id": "661e319a83547e146777416e",
+    "framework": "html-css",
+    "typescript": false,
+    "styling": "CSS",
+    "unit": "px",
+    "naming": "Kebab Case",
+    "path": "public/",
+    "componentsPath": "/Users/abrarshahriar/Documents/ecom/src/components",
+    "screensPath": "/Users/abrarshahriar/Documents/ecom/src/pages"
+  }
+}

@@ -1,0 +1,142 @@
+{% extends "business/base.html" %}
+
+{% load static %}
+
+{% block slider %}
+
+<div class="breadcrumb-block style-img">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Explore The Community</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href='{% url "home" %}'>Homepage</a>
+                        <i class='ph ph-caret-right text-sm text-secondary2'></i>
+                        <div class='text-secondary2 capitalize'>Community</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock slider %}
+
+{% block content %}
+
+<div class="shop-product breadcrumb1 lg:py-20 md:py-14 py-10">
+    <div class="container">
+        <div class="flex max-md:flex-wrap max-md:flex-col-reverse gap-y-8">
+            <div class='sidebar lg:w-1/4 md:w-1/3 w-full md:pr-12'>
+                <div class="choose-color">
+                    <a href="{% url "events" %}">
+                        <div class="heading6">Respond to events happening near you!
+                        </div>
+                    </a>
+                </div>
+                <form method="get" class="mb-4">
+                    <div class="filter-brand pb-8 mt-8">
+                        <div class="heading6">Countries</div>
+                        <div class="list-brand mt-4">
+                            {% for country in countries %}
+                            <div class="brand-item flex items-center justify-between" data-item="countries">
+                                <div class="left flex items-center cursor-pointer">
+                                    <div class="block-input">
+                                        <input type="checkbox" name="country" id="country-{{ country.id }}" value="{{ country.id }}" {% if country.id|stringformat:"i" in selected_countries %}checked{% endif %} />
+                                        <i class='ph-fill ph-check-square icon-checkbox text-2xl'></i>
+                                    </div>
+                                    <label for="country-{{ country.id }}" class="brand-name capitalize pl-2 cursor-pointer">{{ country.name }}</label>
+                                </div>
+                                <div class='text-secondary2 number'>
+                                    {{ country.business_set.count }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="heading6 mt-8">States</div>
+                        <div class="list-brand mt-4">
+                            {% for state in states %}
+                            <div class="brand-item flex items-center justify-between" data-item="states">
+                                <div class="left flex items-center cursor-pointer">
+                                    <div class="block-input">
+                                        <input type="checkbox" name="state" id="state-{{ state.id }}" value="{{ state.id }}" {% if state.id|stringformat:"i" in selected_states %}checked{% endif %} />
+                                        <i class='ph-fill ph-check-square icon-checkbox text-2xl'></i>
+                                    </div>
+                                    <label for="state-{{ state.id }}" class="brand-name capitalize pl-2 cursor-pointer">{{ state.name }}</label>
+                                </div>
+                                <div class='text-secondary2 number'>
+                                    {{ state.business_set.count }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button type="submit" class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">Filter</button>
+                </form>
+            </div>
+            <div class="list-product-block style-list lg:w-3/4 md:w-2/3 w-full md:pl-3">
+                <div class='list-product hide-product-sold flex flex-col gap-8 mt-7' data-item="4">
+                    {% if businesses %}
+                    {% for business in businesses %}
+                    <div data-item="2" class="product-item list-type mt-10">
+                        <div class="product-main cursor-pointer flex lg:items-center sm:justify-between gap-7 max-lg:gap-5">
+                            <div class="product-thumb bg-white relative overflow-hidden rounded-2xl block max-sm:w-1/2">
+                                <div class="product-tag text-button-uppercase bg-green px-3 py-0.5 inline-block rounded-full absolute top-3 left-3 z-[1]">New</div>
+                                <a href="{% url "business_detail" business.business_slug %}">
+                                    <div class="product-img w-full aspect-[3/4] rounded-2xl overflow-hidden">
+                                        <img key="0" class="w-full h-full object-cover duration-700" src="{{ business.banner_image.url }}" alt="img">
+                                    </div>
+                                </a>
+                                <div class="list-action px-5 absolute w-full bottom-5 max-lg:hidden">
+                                    <div class="quick-shop-block absolute left-5 right-5 bg-white p-5 rounded-[20px]">
+                                            <div class="list-size flex items-center justify-center flex-wrap gap-2">
+                                                
+                                                    <div key="0" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XS</div>
+                    
+                                                    <div key="1" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">S</div>
+                    
+                                                    <div key="2" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">M</div>
+                    
+                                                    <div key="3" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">L</div>
+                    
+                                                    <div key="4" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XL</div>
+                    
+                                                    <div key="5" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">2XL</div>
+                    
+                                            </div>
+                                            <div class="add-cart-btn button-main w-full text-center rounded-full py-3 mt-4">Add To cart</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex sm:items-center gap-7 max-lg:gap-4 max-lg:flex-wrap lg:w-2/3 lg:flex-shrink-0 max-lg:w-full max-sm:flex-col max-sm:w-1/2">
+                                    <div class="product-infor max-sm:w-full">
+                                        <a href="{% url "business_detail" business.business_slug %}"><div class="product-name heading6 inline-block duration-300">{{ business.business_name }}</div></a>
+                                        <div class="text-secondary desc mt-5 max-sm:hidden">{{ business.description }}</div>
+                                    </div>
+                                    <div class="action w-fit flex flex-col items-center justify-center">
+                                        <a href="{% url "business_detail" business.business_slug %}">
+                                            <div class="quick-shop-btn button-main whitespace-nowrap py-2 px-9 max-lg:px-5 rounded-full bg-white text-black border border-black hover:bg-black hover:text-white">
+                                                See Products
+                                            </div>
+                                        </a>
+                                        <div class="list-action-right flex items-center justify-center gap-3 mt-4">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                    </div>
+                {% endfor %}
+                {% else %}
+                <p>No businesses found.</p>
+                {% endif %}
+                </div>
+
+                <div class="list-pagination w-full flex items-center gap-4 mt-10"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

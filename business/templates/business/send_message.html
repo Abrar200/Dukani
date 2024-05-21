@@ -1,0 +1,56 @@
+{% extends "business/base.html" %}
+
+{% load bootstrap5 %}
+
+{% load static %}
+
+{% block slider %}
+
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Message</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href='index-2.html'>Homepage</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Message {{ business.business_name }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock slider %}
+
+{% block content %}
+
+
+<main class="content">
+    <div class="container p-0">
+
+		<h1 class="h3 mb-3 mt-3">Compose Message</h1>
+
+		<div class="card">
+			<div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="body">Message:</label>
+                        <textarea class="form-control" id="body" name="body" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+			</div>
+		</div>
+	</div>
+</main>
+
+
+
+
+{% endblock content %}

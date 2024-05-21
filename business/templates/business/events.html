@@ -1,0 +1,102 @@
+{% extends "business/base.html" %}
+
+{% load static %}
+
+{% block slider %}
+
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Events</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href='{% url "home" %}'>Homepage</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Events</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock slider %}
+
+{% block content %}
+
+<div class='blog list md:py-20 py-10'>
+    <div class="container">
+        <div class="flex justify-between max-md:flex-col gap-y-12">
+            <div class="left xl:w-3/4 md:w-2/3 pr-2">
+                <div class="list-blog flex flex-col md:gap-10 gap-8" data-item="4"><div>
+                    {% for event in events %}
+                        <div class="blog-item style-list h-full cursor-pointer mb-5" style="margin-bottom: 30px;" data-item="1">
+                            <div class="blog-main h-full flex items-center max-md:flex-col md:items-center gap-8 gap-y-5">
+                                <div class="blog-thumb md:w-1/2 w-full rounded-[20px] overflow-hidden flex-shrink-0">
+                                    <img src="{{ event.banner_image.url }}" alt="blog-img" class="w-full duration-500 flex-shrink-0">
+                                </div>
+                                <div class="blog-infor">
+                                    <a href="{% url "event_detail" event.id %}"><div class="heading6 blog-title mt-3 duration-300">{{ event.title }}</div></a>
+                                    <div class="flex items-center gap-2 mt-2">
+                                        <div class="blog-author caption1 text-secondary">by {{ event.organizer.first_name }} {{ event.organizer.last_name }}</div>
+                                        <span class="w-[20px] h-[1px] bg-black"></span>
+                                        <div class="blog-date caption1 text-secondary">{{ event.start_time }}</div>
+                                    </div>
+                                    <div class="body1 text-secondary mt-4">{{ event.description|truncatewords:30 }}</div>
+                                    <div class="text-button underline mt-4">Read More</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div></div>
+                <div class="list-pagination w-full flex items-center justify-center gap-4 md:mt-10 mt-6"></div>
+            </div>
+
+            <div class="right xl:w-1/4 md:w-1/3 xl:pl-[52px] md:pl-8">
+                <form method="get" class="mb-4">
+                    <div class="filter-brand pb-8 mt-8">
+                        <div class="heading6">Countries</div>
+                        <div class="list-brand mt-4">
+                            {% for country in countries %}
+                            <div class="brand-item flex items-center justify-between" data-item="countries">
+                                <div class="left flex items-center cursor-pointer">
+                                    <div class="block-input">
+                                        <input type="checkbox" name="country" id="country-{{ country.id }}" value="{{ country.id }}" {% if country.id|stringformat:"i" in selected_countries %}checked{% endif %} />
+                                        <i class='ph-fill ph-check-square icon-checkbox text-2xl'></i>
+                                    </div>
+                                    <label for="country-{{ country.id }}" class="brand-name capitalize pl-2 cursor-pointer">{{ country.name }}</label>
+                                </div>
+                                <div class='text-secondary2 number'>
+                                    {{ country.events.count }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="heading6 mt-8">States</div>
+                        <div class="list-brand mt-4">
+                            {% for state in states %}
+                            <div class="brand-item flex items-center justify-between" data-item="states">
+                                <div class="left flex items-center cursor-pointer">
+                                    <div class="block-input">
+                                        <input type="checkbox" name="state" id="state-{{ state.id }}" value="{{ state.id }}" {% if state.id|stringformat:"i" in selected_states %}checked{% endif %} />
+                                        <i class='ph-fill ph-check-square icon-checkbox text-2xl'></i>
+                                    </div>
+                                    <label for="state-{{ state.id }}" class="brand-name capitalize pl-2 cursor-pointer">{{ state.name }}</label>
+                                </div>
+                                <div class='text-secondary2 number'>
+                                    {{ state.events.count }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button type="submit" class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">Filter</button>
+                </form>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
