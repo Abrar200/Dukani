@@ -525,14 +525,60 @@ const addToCart = (productId) => {
 document.addEventListener("DOMContentLoaded", function() {
   const plusIcons = document.querySelectorAll(".ph-plus");
   const minusIcons = document.querySelectorAll(".ph-minus");
-  
+  const colorItems = document.querySelectorAll(".color-item");
+  const sizeItems = document.querySelectorAll(".size-item");
+  const addCartBtns = document.querySelectorAll(".add-cart-btn");
+  const cartIcon = document.querySelector(".cart-icon");
+  const modalCart = document.querySelector(".modal-cart-block");
+  const modalCartMain = document.querySelector(".modal-cart-main");
+  const closeCartIcon = document.querySelector(".close-btn");
+  const continueCartIcon = document.querySelector(".continue");
+  let selectedColorId = null;
+  let selectedSizeId = null;
+
+  const openModalCart = () => {
+      modalCartMain.classList.add("open");
+      modalCart.classList.add("open");
+  };
+
+  const closeModalCart = () => {
+      modalCartMain.classList.remove("open");
+      modalCart.classList.remove("open");
+  };
+
+  // Add event listeners to color items
+  colorItems.forEach(item => {
+      item.addEventListener("click", function() {
+          // Remove 'active' class from all color items
+          colorItems.forEach(i => i.classList.remove("active"));
+          // Add 'active' class to the clicked color item
+          item.classList.add("active");
+          // Update selected color ID and display text
+          selectedColorId = item.dataset.variationId;
+          document.getElementById("selected-color").innerText = `Color: ${item.dataset.color}`;
+      });
+  });
+
+  // Add event listeners to size items
+  sizeItems.forEach(item => {
+      item.addEventListener("click", function() {
+          // Remove 'active' class from all size items
+          sizeItems.forEach(i => i.classList.remove("active"));
+          // Add 'active' class to the clicked size item
+          item.classList.add("active");
+          // Update selected size ID and display text
+          selectedSizeId = item.dataset.variationId;
+          document.getElementById("selected-size").innerText = `Size: ${item.dataset.size}`;
+      });
+  });
+
   plusIcons.forEach(icon => {
       icon.addEventListener("click", function() {
           const itemId = icon.dataset.itemId;
           updateQuantity(itemId, 'increase');
       });
   });
-  
+
   minusIcons.forEach(icon => {
       icon.addEventListener("click", function() {
           const itemId = icon.dataset.itemId;
@@ -541,115 +587,134 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   function updateQuantity(itemId, action) {
-    fetch('/cart/update_quantity/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken,
-      },
-      body: JSON.stringify({ item_id: itemId, action: action }),
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to update quantity');
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        // Update the cart display based on the response
-        updateCartModalContent();
-      }
-    })
-    .catch(error => console.error('Error:', error));
+      fetch('/cart/update_quantity/', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken,
+          },
+          body: JSON.stringify({ item_id: itemId, action: action }),
+      })
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Failed to update quantity');
+          }
+          return response.json();
+      })
+      .then(data => {
+          if (data.success) {
+              updateCartModalContent();
+          }
+      })
+      .catch(error => console.error('Error:', error));
+  }
+
+  addCartBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+          const productId = btn.dataset.productId;
+          addToCart(productId, selectedColorId, selectedSizeId);
+      });
+  });
+
+  cartIcon.addEventListener("click", openModalCart);
+  closeCartIcon.addEventListener("click", closeModalCart);
+  continueCartIcon.addEventListener("click", closeModalCart);
+  modalCart.addEventListener("click", closeModalCart);
+  modalCartMain.addEventListener("click", (e) => {
+      e.stopPropagation();
+  });
+
+  const addToCart = (productId, colorId, sizeId) => {
+      const product_id = productId;
+      const selected_variations = [];
+      if (colorId) selected_variations.push(colorId);
+      if (sizeId) selected_variations.push(sizeId);
+
+      fetch('/cart/', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken,
+          },
+          body: JSON.stringify({ product_id, selected_variations }),
+      })
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Failed to add product to cart');
+          }
+          return response.json();
+      })
+      .then(data => {
+          if (data.success) {
+              updateCartModalContent();
+              openModalCart();
+          }
+      })
+      .catch(error => console.error('Error:', error));
+  };
+
+  function updateCartModalContent() {
+      console.log('Updating cart modal content...');
+      fetchCartData()
+      .then((cartData) => {
+          console.log('Cart data fetched:', cartData);
+          const cartItemsContainer = document.querySelector('.modal-cart-main .list-product');
+          cartItemsContainer.innerHTML = '';
+
+          if (cartData.items.length === 0) {
+              cartItemsContainer.innerHTML = '<p class="mt-1">No product in cart</p>';
+          } else {
+              cartData.items.forEach((item) => {
+                  const cartItem = createCartItemElement(item);
+                  cartItemsContainer.appendChild(cartItem);
+              });
+          }
+
+          const subtotalElement = document.querySelector('.modal-cart-main .total-price');
+          const subtotal = parseFloat(cartData.subtotal) || 0;
+          subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+      });
+  }
+
+  function fetchCartData() {
+      return fetch('/cart/data/')
+      .then((response) => response.json())
+      .then((data) => data);
+  }
+
+  function createCartItemElement(item) {
+      console.log('Creating cart item element for:', item);
+      const cartItemElement = document.createElement('div');
+      cartItemElement.classList.add('item', 'py-5', 'flex', 'items-center', 'justify-between', 'gap-3', 'border-b', 'border-line');
+      cartItemElement.dataset.item = item.id;
+
+      const imageUrl = item.product.image || '/static/path/to/default-image.png';
+
+      cartItemElement.innerHTML = `
+          <div class="infor flex items-center gap-3 w-full">
+              <div class="bg-img w-[100px] aspect-square flex-shrink-0 rounded-lg overflow-hidden">
+                  <img src="${imageUrl}" alt="product" class="w-full h-full">
+              </div>
+              <div class="w-full">
+                  <div class="flex items-center justify-between w-full">
+                      <div class="name text-button">${item.product.name}</div>
+                      <div class="remove-cart-btn remove-btn caption1 font-semibold text-red underline cursor-pointer">
+                          Remove
+                      </div>
+                  </div>
+                  <div class="flex items-center justify-between gap-2 mt-3 w-full">
+                      <div class="flex items-center text-secondary2 capitalize">
+                          ${item.variations.join(' / ')}
+                      </div>
+                      <div class="product-price text-title">$${item.product.price}</div>
+                  </div>
+              </div>
+          </div>
+      `;
+
+      return cartItemElement;
   }
 });
-
-
-addCartBtns.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const productId = btn.dataset.productId;
-    console.log('Product ID from button:', productId); // Add this line
-    addToCart(productId);
-  });
-});
-
-cartIcon.addEventListener("click", openModalCart);
-modalCart.addEventListener("click", closeModalCart);
-closeCartIcon.addEventListener("click", closeModalCart);
-continueCartIcon.addEventListener("click", closeModalCart);
-
-modalCartMain.addEventListener("click", (e) => {
-  e.stopPropagation();
-});
-
-function updateCartModalContent() {
-  console.log('Updating cart modal content...');
-  fetchCartData()
-    .then((cartData) => {
-      console.log('Cart data fetched:', cartData);
-      const cartItemsContainer = document.querySelector('.modal-cart-main .list-product');
-      cartItemsContainer.innerHTML = '';
-
-      if (cartData.items.length === 0) {
-        cartItemsContainer.innerHTML = '<p class="mt-1">No product in cart</p>';
-      } else {
-        cartData.items.forEach((item) => {
-          const cartItem = createCartItemElement(item);
-          cartItemsContainer.appendChild(cartItem);
-        });
-      }
-
-      const subtotalElement = document.querySelector('.modal-cart-main .total-price');
-      const subtotal = parseFloat(cartData.subtotal) || 0;
-      subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
-    })
-}
-
-
-
-
-function fetchCartData() {
-  // Make an AJAX request to fetch the current cart data
-  return fetch('/cart/data/')
-    .then((response) => response.json())
-    .then((data) => data);
-}
-
-function createCartItemElement(item) {
-  console.log('Creating cart item element for:', item);
-  const cartItemElement = document.createElement('div');
-  cartItemElement.classList.add('item', 'py-5', 'flex', 'items-center', 'justify-between', 'gap-3', 'border-b', 'border-line');
-  cartItemElement.dataset.item = item.id;
-
-  const imageUrl = item.product.image || '/static/path/to/default-image.png';
-
-  cartItemElement.innerHTML = `
-    <div class="infor flex items-center gap-3 w-full">
-      <div class="bg-img w-[100px] aspect-square flex-shrink-0 rounded-lg overflow-hidden">
-        <img src="${imageUrl}" alt="product" class="w-full h-full">
-      </div>
-      <div class="w-full">
-        <div class="flex items-center justify-between w-full">
-          <div class="name text-button">${item.product.name}</div>
-          <div class="remove-cart-btn remove-btn caption1 font-semibold text-red underline cursor-pointer">
-            Remove
-          </div>
-        </div>
-        <div class="flex items-center justify-between gap-2 mt-3 w-full">
-          <div class="flex items-center text-secondary2 capitalize">
-            XS/white
-          </div>
-          <div class="product-price text-title">$${item.product.price}</div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  return cartItemElement;
-}
-
-
 
 
 // Countdown cart
@@ -1297,181 +1362,120 @@ const updateCompareIcons = () => {
 handleItemModalCompare();
 
 
-// Modal Quickview
-const modalQuickview = document.querySelector(".modal-quickview-block");
-const modalQuickviewMain = document.querySelector(
-  ".modal-quickview-block .modal-quickview-main"
-);
-const closeQuickviewIcon = document.querySelector(
-  ".modal-quickview-main .close-btn"
-);
+// Modal QuickView
+document.addEventListener("DOMContentLoaded", function() {
+  const quickViewButtons = document.querySelectorAll(".quick-view-btn");
+  const modalQuickViewBlock = document.querySelector(".modal-quickview-block");
+  const closeQuickViewButton = document.querySelector(".modal-quickview-block .close-btn");
 
-const openModalQuickview = () => {
-  modalQuickviewMain.classList.add("open");
-};
+  quickViewButtons.forEach(button => {
+      button.addEventListener("click", function() {
+          const productSlug = button.dataset.productSlug;
+          const businessSlug = button.dataset.businessSlug;
 
-const closeModalQuickview = () => {
-  modalQuickviewMain.classList.remove("open");
-};
+          console.log('Quick View Button:', button);
+          console.log('Product Slug:', productSlug);
+          console.log('Business Slug:', businessSlug);
 
-modalQuickview?.addEventListener("click", closeModalQuickview);
-closeQuickviewIcon?.addEventListener("click", closeModalQuickview);
+          if (!productSlug || !businessSlug) {
+              console.error('Product Slug or Business Slug is missing');
+              return;
+          }
 
-modalQuickviewMain?.addEventListener("click", (e) => {
-  e.stopPropagation();
-});
-
-// show information about product in modalQuickview
-const handleItemModalQuickview = () => {
-  quickViewStore = localStorage.getItem("quickViewStore");
-  quickViewStore = quickViewStore ? JSON.parse(quickViewStore) : [];
-
-  // Set quickView item
-  quickViewStore.forEach((item) => {
-    modalQuickviewMain.setAttribute('data-item', item.id)
-
-    const listImg = modalQuickviewMain.querySelector('.list-img')
-    listImg.innerHTML = `
-      ${item.images.map((img) => (
-      `
-        <div class="bg-img w-full aspect-[3/4] max-md:w-[150px] max-md:flex-shrink-0 rounded-[20px] overflow-hidden md:mt-6">
-          <img
-            src=${img}
-            alt="item"
-            class="w-full h-full object-cover"
-          />
-        </div>
-        `
-    )).join('')}
-    `
-
-    modalQuickviewMain.querySelector('.product-infor .category').innerHTML = item.category
-    modalQuickviewMain.querySelector('.product-infor .name').innerHTML = item.name
-
-    let arrOfStar = "";
-    for (let i = 0; i < 5; i++) {
-      if (item.rate) {
-        if (i >= item.rate) {
-          arrOfStar += '<i class="ph-fill ph-star text-sm text-secondary"></i>';
-        } else {
-          arrOfStar += '<i class="ph-fill ph-star text-sm text-yellow"></i>';
-        }
-      }
-    }
-    modalQuickviewMain.querySelector('.product-infor .rate').innerHTML = arrOfStar
-    modalQuickviewMain.querySelector('.product-infor .product-price').innerHTML = '$' + item.price + '.00'
-    modalQuickviewMain.querySelector('.product-infor .product-origin-price del').innerHTML = '$' + item.originPrice + '.00'
-    modalQuickviewMain.querySelector('.product-infor .product-sale').innerHTML = '-' + Math.floor(100 - (item.price / item.originPrice) * 100) + '%'
-    modalQuickviewMain.querySelector('.product-infor .desc').innerHTML = item.description
-
-    const listColor = modalQuickviewMain.querySelector('.list-color')
-    listColor.innerHTML = `
-      ${item.variation.map((color) => (
-      `
-        <div class="color-item w-12 h-12 rounded-xl duration-300 relative">
-          <img
-              src="${color.colorImage}"
-              alt='color'
-              class='rounded-xl w-full h-full object-cover'
-          />
-          <div class="tag-action bg-black text-white caption2 capitalize px-1.5 py-0.5 rounded-sm">${color.color}</div>
-        </div>
-        `
-    )).join('')}
-    `
-
-    const listCategory = modalQuickviewMain.querySelector('.list-category')
-
-    listCategory.innerHTML = `
-      <a href="shop-breadcrumb1.html" class="text-secondary">${item.category},</a>
-      <a href="shop-breadcrumb1.html" class="text-secondary"> ${item.gender}</a>
-    `
-
-    const listTag = modalQuickviewMain.querySelector('.list-tag')
-
-    listTag.innerHTML = `
-      <a href="shop-breadcrumb1.html" class="text-secondary">${item.type}</a>
-    `
-
-    let wishlistStore = localStorage.getItem("wishlistStore");
-    wishlistStore = wishlistStore ? JSON.parse(wishlistStore) : [];
-    const addWishlistIcon = modalQuickviewMain.querySelector('.add-wishlist-btn')
-
-    const existingIndex = wishlistStore.findIndex(
-      (prd) => prd.id === item.id
-    );
-
-    if (existingIndex > -1) {
-      // If prd existed in wishlist, remove it from wishlist
-      addWishlistIcon.classList.add("active");
-      addWishlistIcon.querySelector("i").classList.remove("ph");
-      addWishlistIcon.querySelector("i").classList.add("ph-fill");
-    } else {
-      // If prd not exist in wishlist, add it to wishlist
-      addWishlistIcon.classList.remove("active");
-      addWishlistIcon.querySelector("i").classList.add("ph");
-      addWishlistIcon.querySelector("i").classList.remove("ph-fill");
-    }
-
-    addWishlistIcon.addEventListener("click", (e) => {
-      const existingIndex = wishlistStore.findIndex(
-        (prd) => prd.id === item.id
-      );
-
-      if (existingIndex > -1) {
-        // If prd existed in wishlist, remove it from wishlist
-        wishlistStore.splice(existingIndex, 1);
-        addWishlistIcon.classList.remove("active");
-        addWishlistIcon.querySelector("i").classList.add("ph");
-        addWishlistIcon.querySelector("i").classList.remove("ph-fill");
-      } else {
-        // If prd not exist in wishlist, add it to wishlist
-        wishlistStore.push(item);
-        addWishlistIcon.classList.add("active");
-        addWishlistIcon.querySelector("i").classList.remove("ph");
-        addWishlistIcon.querySelector("i").classList.add("ph-fill");
-      }
-
-      // Save wishlist to localStorage
-      localStorage.setItem("wishlistStore", JSON.stringify(wishlistStore));
-
-      handleItemModalWishlist()
-      openModalWishlist()
-    });
-
-
-
-    
-
-    handleActiveSizeChange()
-    handleActiveColorChange()
+          fetch(`/ajax/product/${businessSlug}/${productSlug}/`)
+              .then(response => {
+                  console.log('Response status:', response.status);
+                  if (!response.ok) {
+                      throw new Error('Network response was not ok');
+                  }
+                  return response.json();
+              })
+              .then(data => {
+                  console.log('Data:', data);
+                  updateQuickViewModal(data);
+                  modalQuickViewBlock.style.display = "block";
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+              });
+      });
   });
-};
 
-// Select all the "QUICK VIEW" buttons
-const quickViewBtns = document.querySelectorAll(".quick-view-btn");
-
-quickViewBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const productItem = btn.closest(".product-item");
-    const productId = productItem.dataset.productId;
-    const productDataJson = productItem.dataset.productData;
-
-    // Debug statement
-    console.log('Product data JSON:', productDataJson);
-
-    // Check if productDataJson is not empty or undefined
-    if (productDataJson) {
-      const productData = JSON.parse(productDataJson);
-      // Populate the quick view modal with productData
-      populateQuickViewModal(productData);
-    } else {
-      console.error("Product data is missing or invalid");
-    }
-
-    // Open the quick view modal
-    openModalQuickview();
+  closeQuickViewButton.addEventListener("click", function() {
+      modalQuickViewBlock.style.display = "none";
   });
+
+  modalQuickViewBlock.addEventListener("click", function(event) {
+      if (event.target === modalQuickViewBlock) {
+          modalQuickViewBlock.style.display = "none";
+      }
+  });
+
+  function updateQuickViewModal(data) {
+      document.getElementById("quickview-name").innerText = data.name;
+      document.getElementById("quickview-price").innerText = `$${data.price}`;
+      document.getElementById("quickview-description").innerText = data.description;
+      document.getElementById("quickview-sku").innerText = data.sku;
+      document.getElementById("quickview-categories").innerText = data.categories.join(", ");
+      document.getElementById("quickview-tags").innerText = data.tags.join(", ");
+
+      const imagesContainer = document.getElementById("quickview-images");
+      imagesContainer.innerHTML = "";
+      data.images.forEach(imageUrl => {
+          const imgElement = document.createElement("div");
+          imgElement.className = "bg-img w-full aspect-[3/4] max-md:w-[150px] max-md:flex-shrink-0 rounded-[20px] overflow-hidden md:mt-6";
+          imgElement.innerHTML = `<img src="${imageUrl}" alt="product image" class="w-full h-full object-cover">`;
+          imagesContainer.appendChild(imgElement);
+      });
+
+      const colorsContainer = document.getElementById("quickview-colors");
+      colorsContainer.innerHTML = "";
+      data.color_variations.forEach(variation => {
+          const colorItem = document.createElement("div");
+          colorItem.classList.add("color-item", "w-12", "h-12", "rounded-xl", "duration-300", "relative");
+          colorItem.dataset.variationId = variation.values__id;
+          colorItem.dataset.color = variation.values__value;
+
+          if (variation.values__image) {
+              const imgElement = document.createElement("img");
+              imgElement.src = variation.values__image;
+              imgElement.alt = "color";
+              imgElement.classList.add("rounded-xl");
+              colorItem.appendChild(imgElement);
+          }
+
+          const tagAction = document.createElement("div");
+          tagAction.classList.add("tag-action", "bg-black", "text-white", "caption2", "capitalize", "px-1.5", "py-0.5", "rounded-sm");
+          tagAction.innerText = variation.values__value;
+          colorItem.appendChild(tagAction);
+
+          colorItem.addEventListener("click", function() {
+              colorsContainer.querySelectorAll('.color-item').forEach(i => i.classList.remove('active'));
+              colorItem.classList.add('active');
+              document.querySelector('#selected-color').innerText = `Color: ${variation.values__value}`;
+          });
+
+          colorsContainer.appendChild(colorItem);
+      });
+
+      const sizesContainer = document.getElementById("quickview-sizes");
+      sizesContainer.innerHTML = "";
+      data.size_variations.forEach(variation => {
+          const sizeItem = document.createElement("div");
+          sizeItem.classList.add("size-item", "w-12", "h-12", "flex", "items-center", "justify-center", "text-button", "rounded-full", "bg-white", "border", "border-line");
+          sizeItem.dataset.variationId = variation.values__id;
+          sizeItem.dataset.size = variation.values__value;
+          sizeItem.innerText = variation.values__value;
+
+          sizeItem.addEventListener("click", function() {
+              sizesContainer.querySelectorAll('.size-item').forEach(i => i.classList.remove('active'));
+              sizeItem.classList.add('active');
+              document.querySelector('#selected-size').innerText = `Size: ${variation.values__value}`;
+          });
+
+          sizesContainer.appendChild(sizeItem);
+      });
+  }
 });
 
 

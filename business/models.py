@@ -3,6 +3,7 @@ from users.models import CustomUser
 from django.utils.text import slugify
 from django.core.serializers import serialize
 import json
+from django.utils import timezone
 
 class Country(models.Model):
     name = models.CharField(max_length=300)
@@ -29,7 +30,7 @@ class Business(models.Model):
     business_slug = models.SlugField(unique=True, blank=True)
     business_type = models.CharField(max_length=20, choices=BUSINESS_TYPE_CHOICES)
     countries = models.ManyToManyField(Country)
-    states = models.ManyToManyField(State)
+    states = models.ManyToManyField(State)  # Add this line
     address = models.CharField(max_length=200)
     phone = models.CharField(max_length=20)
     website = models.URLField(blank=True, null=True)
@@ -85,9 +86,10 @@ class Product(models.Model):
     is_best_seller = models.BooleanField(default=False)
     min_delivery_time = models.PositiveIntegerField(null=True, help_text="Minimum estimated delivery time in business days")
     max_delivery_time = models.PositiveIntegerField(null=True, help_text="Maximum estimated delivery time in business days")
+    has_variations = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'{self.business.business_name, self.name}'
+        return f'{self.business.business_name}, {self.name}'
 
     def get_json_data(self):
         data = {
@@ -107,11 +109,54 @@ class Product(models.Model):
         super().save(*args, **kwargs)
 
 
+VAR_CATEGORIES = (
+    ('size', 'Size'),
+    ('color', 'Color'),
+)
+
+class Variation(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variations')
+    name = models.CharField(max_length=50, choices=VAR_CATEGORIES, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.product.name} - {self.get_name_display()}"
+
+class ProductVariation(models.Model):
+    variation = models.ForeignKey(Variation, on_delete=models.CASCADE, related_name='values', null=True)
+    value = models.CharField(max_length=50, null=True)
+    image = models.ImageField(upload_to='product_variations/', null=True, blank=True)
+
+    class Meta:
+        unique_together = (('variation', 'value'),)
+
+    def __str__(self):
+        return f"{self.variation.product.name} - {self.variation.get_name_display()} - {self.value}"
+
+class Cart(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='cart')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    variation_key = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product.name}"
+
+class CartItemVariation(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='variations')
+    product_variation = models.ForeignKey(ProductVariation, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.cart} - {self.product_variation}"
+
 
 class Service(models.Model):
     name = models.CharField(max_length=100)
     service_slug = models.SlugField(unique=True, blank=True)
+    image = models.ImageField(upload_to='services/', null=True)
     description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='services')
 
     def __str__(self):
@@ -132,30 +177,27 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
-    
-
-class Cart(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='cart')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.product.name}"
-    
 
 
 class Message(models.Model):
-    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='sent_messages')
-    recipient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_messages')
-    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='messages', null=True)
+    sender = models.ForeignKey(CustomUser, related_name='sent_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(CustomUser, related_name='received_messages', on_delete=models.CASCADE)
+    business = models.ForeignKey(Business, related_name='messages', on_delete=models.CASCADE, null=True)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"Message from {self.sender.username} to {self.recipient.username}"
+        return f'Message from {self.sender} to {self.recipient} in {self.business}'
+
+    @property
+    def sender_is_business(self):
+        return self.sender.business.exists()
+
+    @property
+    def recipient_is_business(self):
+        return self.recipient.business.exists()
+
     
 
 
@@ -168,6 +210,8 @@ class Event(models.Model):
     start_time = models.DateTimeField()
     location = models.CharField(max_length=255)
     banner_image = models.ImageField(upload_to='event_banners/', blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    is_featured = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title

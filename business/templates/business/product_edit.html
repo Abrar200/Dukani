@@ -35,32 +35,33 @@
                     {% csrf_token %}
                     <div class='grid sm:grid-cols-2 grid-cols-1 gap-4 gap-y-5'>
                         <div class="name">
-                            <label>Name</label>
-                            <input class="border-line px-4 py-3 w-full rounded-lg" id="product_name" type="text" name="name" value="{{ product.name }}"/>
+                            <input class="border-line px-4 py-3 w-full rounded-lg" id="product_name" type="text" name="name" placeholder="Product Name *" value="{{ product.name }}" required />
                         </div>
-                        
                         <div class="price">
-                            <label>Price</label>
-                            <input class="border-line px-4 py-3 w-full rounded-lg" id="product_price" type="number" step="0.01" name="price" value="{{ product.price }}"/>
+                            <input class="border-line px-4 py-3 w-full rounded-lg" id="product_price" type="number" step="0.01" name="price" placeholder="Product Price *" value="{{ product.price }}" required />
                         </div>
                         <div class="image">
                             <label>Image</label>
-                            <input class="border-line px-4 py-3 w-full rounded-lg" id="product_image" type="file" name="image" accept="image/*"/>
+                            <input class="border-line px-4 py-3 w-full rounded-lg" id="product_image" type="file" name="image" accept="image/*" />
+                            {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="mt-2 w-32 h-32 object-cover rounded-lg">
+                            {% endif %}
                         </div>
                         <div class="image2">
                             <label>Second Image</label>
-                            <input class="border-line px-4 py-3 w-full rounded-lg" id="product_image2" type="file" name="image2" accept="image/*"/>
+                            <input class="border-line px-4 py-3 w-full rounded-lg" id="product_image2" type="file" name="image2" accept="image/*" />
+                            {% if product.image2 %}
+                            <img src="{{ product.image2.url }}" alt="{{ product.name }}" class="mt-2 w-32 h-32 object-cover rounded-lg">
+                            {% endif %}
                         </div>
                         <div class="name">
-                            <label>Minimum Delivery Time</label>
-                            <input class="border-line px-4 py-3 w-full rounded-lg" id="min_delivery_time" type="text" name="min_delivery_time" value="{{ product.min_delivery_time }}"/>
+                            <input class="border-line px-4 py-3 w-full rounded-lg" id="min_delivery_time" type="text" name="min_delivery_time" placeholder="Minimum estimated delivery time in business days *" value="{{ product.min_delivery_time }}" required />
                         </div>
                         <div class="name">
-                            <label>Maximum Delivery Time</label>
-                            <input class="border-line px-4 py-3 w-full rounded-lg" id="min_delivery_time" type="text" name="max_delivery_time" value="{{ product.max_delivery_time }}"/>
+                            <input class="border-line px-4 py-3 w-full rounded-lg" id="max_delivery_time" type="text" name="max_delivery_time" placeholder="Maximum estimated delivery time in business days *" value="{{ product.max_delivery_time }}" required />
                         </div>
                         <div class="message sm:col-span-2">
-                            <textarea class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="message" name="description" rows="3">{{ product.description }}</textarea>
+                            <textarea class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="message" name="description" rows="3" placeholder="Product Description *" required>{{ product.description }}</textarea>
                         </div>
                         <div class="in_stock">
                             <div class="flex items-center">
@@ -68,12 +69,80 @@
                                 <label for="product_in_stock" class="ml-2">In Stock</label>
                             </div>
                         </div>
+                        <div class="has_variations sm:col-span-2">
+                            <div class="flex items-center">
+                                <input class="border-line px-4 py-3 rounded-lg" id="has_variations" type="checkbox" name="has_variations" {% if product.has_variations %}checked{% endif %} />
+                                <label for="has_variations" class="ml-2">This product has variations (color, size)</label>
+                            </div>
+                        </div>
+                        <div id="variation_section" class="variations sm:col-span-2 {% if not product.has_variations %}hidden{% endif %}">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="variation-names">
+                                    <label>Variation Names</label>
+                                    <div class="flex flex-wrap">
+                                        {% for category, display_name in VAR_CATEGORIES %}
+                                        <div class="variation-name-item mr-2 mb-2">
+                                            <input class="border-line px-4 py-3 rounded-lg" type="checkbox" name="variation_names" value="{{ category }}" id="variation_name_{{ category }}" {% if category in variation_names %}checked{% endif %}>
+                                            <label for="variation_name_{{ category }}" class="ml-2">{{ display_name }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="variation-values">
+                                    <label>Variation Values</label>
+                                    <div id="variation_values_container" class="flex flex-wrap">
+                                        {% for category, display_name in VAR_CATEGORIES %}
+                                        <div class="variation-value-item mr-2 mb-2 {% if category not in variation_names %}hidden{% endif %}" id="variation_value_{{ category }}">
+                                            <div class="variation-value-input mr-2 mb-2">
+                                                <input class="border-line px-4 py-3 rounded-lg" type="text" name="variation_values_{{ category }}" placeholder="Enter {{ display_name }} value" />
+                                                <input class="border-line px-4 py-3 rounded-lg" type="file" name="variation_images_{{ category }}" accept="image/*" />
+                                            </div>
+                                            <button type="button" class="add-variation-value-btn button-main bg-black hover:bg-green text-white rounded-full whitespace-nowrap py-3 px-4 rounded-lg" data-category="{{ category }}">Add {{ display_name }} Value</button>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="block-button md:mt-6 mt-4">
-                        <button class="button-main">Edit Product</button>
+                        <button type="submit" class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">Update Product</button>
                     </div>
                 </form>
                 
+                <script>
+                    document.getElementById('has_variations').addEventListener('change', function() {
+                        const variationSection = document.getElementById('variation_section');
+                        variationSection.classList.toggle('hidden', !this.checked);
+                    });
+                
+                    document.querySelectorAll('input[name="variation_names"]').forEach(function(checkbox) {
+                        checkbox.addEventListener('change', function() {
+                            const category = this.value;
+                            const variationValueItem = document.getElementById(`variation_value_${category}`);
+                            if (this.checked) {
+                                variationValueItem.classList.remove('hidden');
+                            } else {
+                                variationValueItem.classList.add('hidden');
+                            }
+                        });
+                    });
+                
+                    document.querySelectorAll('.add-variation-value-btn').forEach(function(button) {
+                        button.addEventListener('click', function() {
+                            const category = this.dataset.category;
+                            const variationValueItem = document.getElementById(`variation_value_${category}`);
+                            const newInput = document.createElement('div');
+                            newInput.classList.add('variation-value-input', 'mr-2', 'mb-2');
+                            newInput.innerHTML = `
+                                <input class="border-line px-4 py-3 rounded-lg" type="text" name="variation_values_${category}" placeholder="Enter ${category} value" />
+                                <input class="border-line px-4 py-3 rounded-lg" type="file" name="variation_images_${category}" accept="image/*" placeholder="${category} Image" />
+                            `;
+                            variationValueItem.appendChild(newInput);
+                        });
+                    });
+                </script>
+                                
             </div>
             <div class="right lg:w-1/4 lg:pl-4">
                 <div class="item">

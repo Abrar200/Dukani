@@ -66,7 +66,3 @@ document.addEventListener('click', (event) => {
     cartModal.classList.remove('show');
   }
 });
-
-// Add any additional functionality for modals here
-// For example, updating modal content, handling form submissions, or performing AJAX requests
-

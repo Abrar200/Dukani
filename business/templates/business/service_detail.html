@@ -4,12 +4,432 @@
 
 {% block slider %}
 
-
+<div class="breadcrumb-product">
+    <div class="main bg-surface md:pt-[88px] pt-[70px] pb-[14px]">
+        <div class="container flex items-center justify-between flex-wrap gap-3">
+            <div class="left flex items-center gap-1">
+                <a href='{% url "home" %}' class='caption1 text-secondary2 hover:underline'>Homepage</a>
+                <i class='ph ph-caret-right text-xs text-secondary2'></i>
+                <a href="{% url "business_detail" service.business.business_slug %}"><div class='caption1 text-secondary2'>{{ service.business.business_name }}</div></a>
+                <i class='ph ph-caret-right text-xs text-secondary2'></i>
+                <a href="{% url "business_detail" service.business.business_slug %}"><div class='caption1 text-secondary2'>Services</div></a>
+                <i class='ph ph-caret-right text-xs text-secondary2'></i>
+                <div class='caption1 capitalize'>{{ service.name }}</div>
+            </div>
+            <div class="right flex items-center gap-3">
+                <div
+                    class='prev-btn flex items-center cursor-pointer text-secondary hover:text-black pr-3 border-r border-line'>
+                    <i class='ph ph-caret-circle-left text-2xl text-black'></i>
+                    <span class='caption1 pl-1'>Previous Product</span>
+                </div>
+                <div class='next-btn flex items-center
+                        cursor-pointer text-secondary hover:text-black'>
+                    <span class='caption1 pr-1'>Next Product</span>
+                    <i class='ph ph-caret-circle-right text-2xl text-black'></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock slider %}
 
 {% block content %}
 
-
+<div class="product-detail thumbnail-left default">
+    <div class="featured-product underwear filter-product-img md:py-20 py-14">
+        <div class="container flex justify-between gap-y-6 flex-wrap">
+            <div class="list-img md:w-1/2 md:pr-[45px] w-full flex-shrink-0">
+                <div class="sticky">
+                    <div class="swiper mySwiper2 rounded-2xl overflow-hidden swiper-initialized swiper-horizontal swiper-backface-hidden">
+                        <div class="swiper-wrapper" id="swiper-wrapper-c416ccee6e82d8c0" aria-live="polite">
+                            <!--  -->
+                        <div class="swiper-slide popup-link swiper-slide-active" role="group" aria-label="1 / 4" style="width: 382px;">
+                    <img src="{{ service.image.url }}" alt="img" class="w-full aspect-[3/4] object-cover">
+                </div>
+                
+            </div>
+                    <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span></div>
+                    <div class="swiper mySwiper swiper-initialized swiper-horizontal swiper-watch-progress swiper-backface-hidden swiper-thumbs">
+                        <div class="swiper-wrapper" id="swiper-wrapper-f9db48f549bf14de" aria-live="polite" style="transform: translate3d(0px, 0px, 0px);">
+                            <!--  -->
+                        </div>
+                    <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span></div>
+                </div>
+                <div class="swiper popup-img">
+                    <span class="close-popup-btn absolute top-4 right-4 z-[2]">
+                        <i class="ph ph-x text-3xl text-white"></i>
+                    </span>
+                    <div class="swiper-wrapper">
+                        <!--  -->
+                    </div>
+                    <div class="swiper-button-prev"></div>
+                    <div class="swiper-button-next"></div>
+                </div>
+            </div>
+            <div class="product-infor md:w-1/2 w-full lg:pl-[15px] md:pl-2">
+                <div class="flex justify-between">
+                    <div>
+                        <div class="product-category caption2 text-secondary font-semibold uppercase">fashion
+                        </div>
+                        <div class="product-name heading4 mt-1">{{ service.name }}</div>
+                    </div>
+                    <div
+                        class='add-wishlist-btn w-10 h-10 flex-shrink-0 flex items-center justify-center border border-line cursor-pointer rounded-lg duration-300 hover:bg-black hover:text-white'>
+                        <i class="ph ph-heart text-xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1 mt-3">
+                    <div class="rate flex">
+                        <i class="ph-fill ph-star text-sm text-yellow"></i>
+                        <i class="ph-fill ph-star text-sm text-yellow"></i>
+                        <i class="ph-fill ph-star text-sm text-yellow"></i>
+                        <i class="ph-fill ph-star text-sm text-yellow"></i><i
+                            class="ph-fill ph-star text-sm text-yellow"></i>
+                    </div>
+                    <span class='caption1 text-secondary'>(1.234 reviews)</span>
+                </div>
+                <div class="flex items-center gap-3 flex-wrap mt-5 pb-6 border-b border-line">
+                    <div class="product-price heading5">${{ service.price }}</div>
+                    <div class='w-px h-4 bg-line'></div>
+                    <div class="product-origin-price font-normal text-secondary2">
+                        <del>$32.00</del>
+                    </div>
+                    <div class="product-sale caption2 font-semibold bg-green px-3 py-0.5 inline-block rounded-full">
+                        -19%
+                    </div>
+                    <div class='product-description text-secondary mt-3'>{{ service.description }}</div>
+                </div>
+                <div class="list-action mt-6">
+                    {% if request.user.is_authenticated and request.user == service.business.seller %}
+                        <a href="{% url 'service_edit' service.business.business_slug service.service_slug %}"><div
+                            class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">
+                            Edit Service
+                        </div></a>
+                    {% endif %}
+                    {% if product.has_variations %}
+                    <div class="choose-color mt-5">
+                        <div class="text-title">Colors: <span class='text-title color'></span>
+                        </div>
+                        <div class="list-color flex items-center gap-2 flex-wrap mt-3">
+                            <!-- color-item -->
+                        </div>
+                    </div>
+                    <div class="choose-size mt-5">
+                        <div class="heading flex items-center justify-between">
+                            <div class="text-title">Size: <span class='text-title size'></span>
+                            </div>
+                            <div class="caption1 size-guide text-red underline">Size Guide</div>
+                        </div>
+                        <div class="list-size flex items-center gap-2 flex-wrap mt-3">
+                            <!-- size-item -->
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="review-block md:py-20 py-10 bg-surface">
+        <div class="container">
+            <div class="heading flex items-center justify-between flex-wrap gap-4">
+                <div class="heading4">Customer Review</div>
+                <a href='#form-review' class='button-main bg-white text-black border border-black'>Write
+                    Reviews
+                </a>
+            </div>
+            <div class="top-overview flex justify-between py-6 max-md:flex-col gap-y-6">
+                <div class="rating lg:w-1/4 md:w-[30%] lg:pr-[75px] md:pr-[35px]">
+                    <div class="heading flex items-center justify-center flex-wrap gap-3 gap-y-4">
+                        <div class="text-display">4.6</div>
+                        <div class='flex flex-col items-center'>
+                            <div class="rate flex">
+                                <i class="ph-fill ph-star text-lg text-yellow"></i>
+                                <i class="ph-fill ph-star text-lg text-yellow"></i>
+                                <i class="ph-fill ph-star text-lg text-yellow"></i>
+                                <i class="ph-fill ph-star text-lg text-yellow"></i>
+                                <i class="ph-fill ph-star text-lg text-yellow"></i>
+                            </div>
+                            <div class='text-secondary text-center mt-1'>(1,968 Ratings)</div>
+                        </div>
+                    </div>
+                    <div class="list-rating mt-3">
+                        <div class="item flex items-center justify-between gap-1.5">
+                            <div class="flex items-center gap-1">
+                                <div class="caption1">5</div>
+                                <i class="ph-fill ph-star text-sm"></i>
+                            </div>
+                            <div class="progress bg-line relative w-3/4 h-2">
+                                <div class="progress-percent absolute bg-yellow w-[50%] h-full left-0 top-0">
+                                </div>
+                            </div>
+                            <div class="caption1">50%</div>
+                        </div>
+                        <div class="item flex items-center justify-between gap-1.5 mt-1">
+                            <div class="flex items-center gap-1">
+                                <div class="caption1">4</div>
+                                <i class="ph-fill ph-star text-sm"></i>
+                            </div>
+                            <div class="progress bg-line relative w-3/4 h-2">
+                                <div class="progress-percent absolute bg-yellow w-[20%] h-full left-0 top-0">
+                                </div>
+                            </div>
+                            <div class="caption1">20%</div>
+                        </div>
+                        <div class="item flex items-center justify-between gap-1.5 mt-1">
+                            <div class="flex items-center gap-1">
+                                <div class="caption1">3</div>
+                                <i class="ph-fill ph-star text-sm"></i>
+                            </div>
+                            <div class="progress bg-line relative w-3/4 h-2">
+                                <div class="progress-percent absolute bg-yellow w-[10%] h-full left-0 top-0">
+                                </div>
+                            </div>
+                            <div class="caption1">10%</div>
+                        </div>
+                        <div class="item flex items-center justify-between gap-1.5 mt-1">
+                            <div class="flex items-center gap-1">
+                                <div class="caption1">2</div>
+                                <i class="ph-fill ph-star text-sm"></i>
+                            </div>
+                            <div class="progress bg-line relative w-3/4 h-2">
+                                <div class="progress-percent absolute bg-yellow w-[10%] h-full left-0 top-0">
+                                </div>
+                            </div>
+                            <div class="caption1">10%</div>
+                        </div>
+                        <div class="item flex items-center justify-between gap-1.5 mt-1">
+                            <div class="flex items-center gap-2">
+                                <div class="caption1">1</div>
+                                <i class="ph-fill ph-star text-sm"></i>
+                            </div>
+                            <div class="progress bg-line relative w-3/4 h-2">
+                                <div class="progress-percent absolute bg-yellow w-[10%] h-full left-0 top-0">
+                                </div>
+                            </div>
+                            <div class="caption1">10%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-img lg:w-3/4 md:w-[70%] lg:pl-[15px] md:pl-[15px]">
+                    <div class="heading5">All Image (128)</div>
+                    <div class="list md:mt-6 mt-3">
+                        <div class="swiper swiper-img-review h-full relative">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <img src='assets/images/product/fashion/8-2.png' alt='img'
+                                        class='w-[120px] aspect-square object-cover rounded-lg' />
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src='assets/images/product/fashion/7-2.png' alt='img'
+                                        class='w-[120px] aspect-square object-cover rounded-lg' />
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src='assets/images/product/fashion/6-2.png' alt='img'
+                                        class='w-[120px] aspect-square object-cover rounded-lg' />
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src='assets/images/product/fashion/5-2.png' alt='img'
+                                        class='w-[120px] aspect-square object-cover rounded-lg' />
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src='assets/images/product/fashion/4-2.png' alt='img'
+                                        class='w-[120px] aspect-square object-cover rounded-lg' />
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src='assets/images/product/fashion/3-2.png' alt='img'
+                                        class='w-[120px] aspect-square object-cover rounded-lg' />
+                                </div>
+                                <div class="swiper-slide">
+                                    <img src='assets/images/product/fashion/2-2.png' alt='img'
+                                        class='w-[120px] aspect-square object-cover rounded-lg' />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sorting flex items-center flex-wrap md:gap-5 gap-3 gap-y-3 mt-6">
+                        <div class="text-button">Sort by</div>
+                        <div class="item bg-white px-4 py-1 border border-line rounded-full">Newest</div>
+                        <div class="item bg-white px-4 py-1 border border-line rounded-full">5 Star</div>
+                        <div class="item bg-white px-4 py-1 border border-line rounded-full">4 Star</div>
+                        <div class="item bg-white px-4 py-1 border border-line rounded-full">3 Star</div>
+                        <div class="item bg-white px-4 py-1 border border-line rounded-full">2 Star</div>
+                        <div class="item bg-white px-4 py-1 border border-line rounded-full">1 Star</div>
+                    </div>
+                </div>
+            </div>
+            <div class="list-review">
+                <div class="item flex max-lg:flex-col gap-y-4 w-full py-6 border-t border-line">
+                    <div class="left lg:w-1/4 w-full lg:pr-[15px]">
+                        <div class="list-img-review flex gap-2">
+                            <img src='assets/images/product/fashion/9-2.png' alt='img'
+                                class='w-[60px] aspect-square rounded-lg' />
+                            <img src='assets/images/product/fashion/9-3.png' alt='img'
+                                class='w-[60px] aspect-square rounded-lg' />
+                            <img src='assets/images/product/fashion/9-4.png' alt='img'
+                                class='w-[60px] aspect-square rounded-lg' />
+                        </div>
+                        <div class="user mt-3">
+                            <div class="text-title">Tony Nguyen</div>
+                            <div class="flex items-center gap-2">
+                                <div class="text-secondary2">1 days ago</div>
+                                <div class="text-secondary2">-</div>
+                                <div class="text-secondary2"><span>Yellow</span> / <span>XL</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right lg:w-3/4 w-full lg:pl-[15px]">
+                        <div class="rate flex">
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                        </div>
+                        <div class="heading5 mt-3">Unbeatable Style and Quality: A Fashion Brand That Delivers
+                        </div>
+                        <div class="body1 mt-3">I can't get enough of the fashion pieces from this
+                            brand. They
+                            have a great selection for every occasion and the prices are reasonable. The shipping is
+                            fast and the
+                            items always arrive in perfect condition.</div>
+                        <div class="action mt-3">
+                            <div class="flex items-center gap-4">
+                                <div class="like-btn flex items-center gap-1 cursor-pointer">
+                                    <i class="ph ph-hands-clapping text-lg"></i>
+                                    <div class="text-button">20</div>
+                                </div>
+                                <a href='#form-review'
+                                    class="reply-btn text-button text-secondary cursor-pointer hover:text-black">
+                                    Reply</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item flex max-lg:flex-col gap-y-4 w-full py-6 border-t border-line">
+                    <div class="left lg:w-1/4 w-full lg:pr-[15px]">
+                        <div class="list-img-review flex gap-2">
+                            <img src='assets/images/product/fashion/5-2.png' alt='img'
+                                class='w-[60px] aspect-square rounded-lg' />
+                            <img src='assets/images/product/fashion/5-1.png' alt='img'
+                                class='w-[60px] aspect-square rounded-lg' />
+                            <img src='assets/images/product/fashion/5-3.png' alt='img'
+                                class='w-[60px] aspect-square rounded-lg' />
+                        </div>
+                        <div class="user mt-3">
+                            <div class="text-title">Tony Nguyen</div>
+                            <div class="flex items-center gap-2">
+                                <div class="text-secondary2">1 days ago</div>
+                                <div class="text-secondary2">-</div>
+                                <div class="text-secondary2"><span>Yellow</span> / <span>XL</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right lg:w-3/4 w-full lg:pl-[15px]">
+                        <div class="rate flex">
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                        </div>
+                        <div class="heading5 mt-3">Exceptional Fashion: The Perfect Blend of Style and
+                            Durability</div>
+                        <div class="body1 mt-3">The fashion brand's online shopping experience is
+                            seamless. The
+                            website is user-friendly, the product images are clear, and the checkout process is
+                            quick.</div>
+                        <div class="action mt-3">
+                            <div class="flex items-center gap-4">
+                                <div class="like-btn flex items-center gap-1 cursor-pointer">
+                                    <i class="ph ph-hands-clapping text-lg"></i>
+                                    <div class="text-button">20</div>
+                                </div>
+                                <a href='#form-review'
+                                    class="reply-btn text-button text-secondary cursor-pointer hover:text-black">
+                                    Reply</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="item flex max-lg:flex-col gap-y-4 w-full py-6 border-t border-line">
+                    <div class="left lg:w-1/4 w-full lg:pr-[15px]">
+                        <div class="list-img-review flex gap-2">
+                            <img src='assets/images/product/fashion/22-2.png' alt='img'
+                                class='w-[60px] aspect-square rounded-lg' />
+                            <img src='assets/images/product/fashion/22-1.png' alt='img'
+                                class='w-[60px] aspect-square rounded-lg' />
+                            <img src='assets/images/product/fashion/22-3.png' alt='img'
+                                class='w-[60px] aspect-square rounded-lg' />
+                        </div>
+                        <div class="user mt-3">
+                            <div class="text-title">Tony Nguyen</div>
+                            <div class="flex items-center gap-2">
+                                <div class="text-secondary2">1 days ago</div>
+                                <div class="text-secondary2">-</div>
+                                <div class="text-secondary2"><span>Yellow</span> / <span>XL</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right lg:w-3/4 w-full lg:pl-[15px]">
+                        <div class="rate flex">
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                            <i class="ph-fill ph-star text-yellow"></i>
+                        </div>
+                        <div class="heading5 mt-3">Elevate Your Wardrobe: Stunning Dresses That Make a Statement
+                        </div>
+                        <div class="body1 mt-3">I love how sustainable and ethically conscious this fashion
+                            brand is. They
+                            prioritize eco-friendly materials and fair trade practices, which makes me feel good
+                            about supporting
+                            them.</div>
+                        <div class="action mt-3">
+                            <div class="flex items-center gap-4">
+                                <div class="like-btn flex items-center gap-1 cursor-pointer">
+                                    <i class="ph ph-hands-clapping text-lg"></i>
+                                    <div class="text-button">20</div>
+                                </div>
+                                <a href='#form-review'
+                                    class="reply-btn text-button text-secondary cursor-pointer hover:text-black">
+                                    Reply</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-button more-review-btn text-center mt-2 underline cursor-pointer">View More
+                    Comments</div>
+            </div>
+            <div id="form-review" class='form-review pt-6'>
+                <div class="heading4">Leave A comment</div>
+                <form class="grid sm:grid-cols-2 gap-4 gap-y-5 mt-6">
+                    <div class="name ">
+                        <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="username" type="text"
+                            placeholder="Your Name *" required />
+                    </div>
+                    <div class="mail ">
+                        <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="email" type="email"
+                            placeholder="Your Email *" required />
+                    </div>
+                    <div class="col-span-full message">
+                        <textarea class="border border-line px-4 py-3 w-full rounded-lg" id="message" name="message"
+                            rows="3" placeholder="Your message *" required></textarea>
+                    </div>
+                    <div class="col-span-full flex items-start -mt-2 gap-2">
+                        <input type="checkbox" id="saveAccount" name="saveAccount" class='mt-1.5' />
+                        <label class="" for="saveAccount">Save my name, email, and website in this browser for
+                            the next time
+                            I comment.</label>
+                    </div>
+                    <div class="col-span-full sm:pt-3">
+                        <button class='button-main bg-white text-black border border-black'>Submit Reviews</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock content %}

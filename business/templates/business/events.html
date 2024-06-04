@@ -29,12 +29,12 @@
     <div class="container">
         <div class="flex justify-between max-md:flex-col gap-y-12">
             <div class="left xl:w-3/4 md:w-2/3 pr-2">
-                <div class="list-blog flex flex-col md:gap-10 gap-8" data-item="4"><div>
+                <div id="event-list" class="list-blog flex flex-col md:gap-10 gap-8" data-item="4"><div>
                     {% for event in events %}
                         <div class="blog-item style-list h-full cursor-pointer mb-5" style="margin-bottom: 30px;" data-item="1">
                             <div class="blog-main h-full flex items-center max-md:flex-col md:items-center gap-8 gap-y-5">
                                 <div class="blog-thumb md:w-1/2 w-full rounded-[20px] overflow-hidden flex-shrink-0">
-                                    <img src="{{ event.banner_image.url }}" alt="blog-img" class="w-full duration-500 flex-shrink-0">
+                                    <a href="{% url 'event_detail' event.id %}"><img src="{{ event.banner_image.url }}" alt="blog-img" class="w-full duration-500 flex-shrink-0"></a>
                                 </div>
                                 <div class="blog-infor">
                                     <a href="{% url "event_detail" event.id %}"><div class="heading6 blog-title mt-3 duration-300">{{ event.title }}</div></a>
@@ -43,18 +43,20 @@
                                         <span class="w-[20px] h-[1px] bg-black"></span>
                                         <div class="blog-date caption1 text-secondary">{{ event.start_time }}</div>
                                     </div>
-                                    <div class="body1 text-secondary mt-4">{{ event.description|truncatewords:30 }}</div>
-                                    <div class="text-button underline mt-4">Read More</div>
+                                    <a href="{% url 'event_detail' event.id %}"><div class="body1 text-secondary mt-4">{{ event.description|truncatewords:30 }}</div></a>
+                                    <a href="{% url 'event_detail' event.id %}"><div class="text-button underline mt-4">Read More</div></a>
                                 </div>
                             </div>
                         </div>
                     {% endfor %}
-                </div></div>
+                </div>
+            </div>
                 <div class="list-pagination w-full flex items-center justify-center gap-4 md:mt-10 mt-6"></div>
             </div>
 
             <div class="right xl:w-1/4 md:w-1/3 xl:pl-[52px] md:pl-8">
-                <form method="get" class="mb-4">
+                <a href="{% url "create_event" %}"><button class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">Create an Event</button></a>
+                <form id="filter-form" method="get" class="mb-4">
                     <div class="filter-brand pb-8 mt-8">
                         <div class="heading6">Countries</div>
                         <div class="list-brand mt-4">
@@ -91,9 +93,125 @@
                             {% endfor %}
                         </div>
                     </div>
-                    <button type="submit" class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">Filter</button>
                 </form>
                 
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const filterForm = document.getElementById('filter-form');
+                        const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
+                        const eventList = document.getElementById('event-list');
+                
+                        checkboxes.forEach(checkbox => {
+                            checkbox.addEventListener('change', function() {
+                                const formData = new FormData(filterForm);
+                                const queryString = new URLSearchParams(formData).toString();
+                
+                                fetch(`/events/?${queryString}`, {
+                                    method: 'GET',
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    eventList.innerHTML = '';
+                                    if (data.events.length === 0) {
+                                        const noEventsMessage = document.createElement('p');
+                                        noEventsMessage.textContent = 'No events found.';
+                                        eventList.appendChild(noEventsMessage);
+                                    } else {
+                                        data.events.forEach(event => {
+                                            const eventItem = document.createElement('div');
+                                            eventItem.classList.add('blog-item', 'style-list', 'h-full', 'cursor-pointer', 'mb-5');
+                                            eventItem.style.marginBottom = '30px';
+                                            eventItem.setAttribute('data-item', '1');
+                
+                                            const blogMain = document.createElement('div');
+                                            blogMain.classList.add('blog-main', 'h-full', 'flex', 'items-center', 'max-md:flex-col', 'md:items-center', 'gap-8', 'gap-y-5');
+                
+                                            const blogThumb = document.createElement('div');
+                                            blogThumb.classList.add('blog-thumb', 'md:w-1/2', 'w-full', 'rounded-[20px]', 'overflow-hidden', 'flex-shrink-0');
+                
+                                            const blogThumbLink = document.createElement('a');
+                                            blogThumbLink.href = `/event/${event.id}/`;
+                
+                                            const blogThumbImg = document.createElement('img');
+                                            blogThumbImg.src = event.banner_image;
+                                            blogThumbImg.alt = 'blog-img';
+                                            blogThumbImg.classList.add('w-full', 'duration-500', 'flex-shrink-0');
+                
+                                            blogThumbLink.appendChild(blogThumbImg);
+                                            blogThumb.appendChild(blogThumbLink);
+                                            blogMain.appendChild(blogThumb);
+                
+                                            const blogInfor = document.createElement('div');
+                                            blogInfor.classList.add('blog-infor');
+                
+                                            const blogTitleLink = document.createElement('a');
+                                            blogTitleLink.href = `/event/${event.id}/`;
+                
+                                            const blogTitle = document.createElement('div');
+                                            blogTitle.classList.add('heading6', 'blog-title', 'mt-3', 'duration-300');
+                                            blogTitle.textContent = event.title;
+                
+                                            blogTitleLink.appendChild(blogTitle);
+                                            blogInfor.appendChild(blogTitleLink);
+                
+                                            const blogMetaDiv = document.createElement('div');
+                                            blogMetaDiv.classList.add('flex', 'items-center', 'gap-2', 'mt-2');
+                
+                                            const blogAuthor = document.createElement('div');
+                                            blogAuthor.classList.add('blog-author', 'caption1', 'text-secondary');
+                                            blogAuthor.textContent = `by ${event.organizer_name}`;
+                
+                                            const blogMetaSeparator = document.createElement('span');
+                                            blogMetaSeparator.classList.add('w-[20px]', 'h-[1px]', 'bg-black');
+                
+                                            const blogDate = document.createElement('div');
+                                            blogDate.classList.add('blog-date', 'caption1', 'text-secondary');
+                                            blogDate.textContent = event.start_time;
+                
+                                            blogMetaDiv.appendChild(blogAuthor);
+                                            blogMetaDiv.appendChild(blogMetaSeparator);
+                                            blogMetaDiv.appendChild(blogDate);
+                                            blogInfor.appendChild(blogMetaDiv);
+                
+                                            const blogDescriptionLink = document.createElement('a');
+                                            blogDescriptionLink.href = `/event/${event.id}/`;
+                
+                                            const blogDescription = document.createElement('div');
+                                            blogDescription.classList.add('body1', 'text-secondary', 'mt-4');
+                
+                                            const truncatedDescription = event.description.split(' ').slice(0, 30).join(' ');
+                                            blogDescription.textContent = `${truncatedDescription}...`;
+                
+                                            blogDescriptionLink.appendChild(blogDescription);
+                                            blogInfor.appendChild(blogDescriptionLink);
+                
+                                            const blogReadMoreLink = document.createElement('a');
+                                            blogReadMoreLink.href = `/event/${event.id}/`;
+                
+                                            const blogReadMore = document.createElement('div');
+                                            blogReadMore.classList.add('text-button', 'underline', 'mt-4');
+                                            blogReadMore.textContent = 'Read More';
+                
+                                            blogReadMoreLink.appendChild(blogReadMore);
+                                            blogInfor.appendChild(blogReadMoreLink);
+                
+                                            blogMain.appendChild(blogInfor);
+                                            eventItem.appendChild(blogMain);
+                                            eventList.appendChild(eventItem);
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error('Error:', error));
+                            });
+                        });
+                    });
+                </script>
+                
+                
+
             </div>
         </div>
     </div>

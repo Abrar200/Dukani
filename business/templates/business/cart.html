@@ -69,35 +69,41 @@
                         </div>
                         <div class="list-product-main w-full mt-3">
                             {% for item in cart_items %}
-                                <div class="item flex md:mt-7 md:pb-7 mt-5 pb-5 border-b border-line w-full">
-                                    <div class="w-1/2">
-                                        <div class="flex items-center gap-6">
-                                            <div class="bg-img md:w-[100px] w-20 aspect-[3/4]">
-                                                <img src="{{ item.product.image.url }}" alt="img" class="w-full h-full object-cover rounded-lg">
-                                            </div>
-                                            <div>
-                                                <div class="text-title">{{ item.product.name }}</div>
-                                                <div class="list-select mt-3"></div>
+                            <div class="item flex md:mt-7 md:pb-7 mt-5 pb-5 border-b border-line w-full">
+                                <div class="w-1/2">
+                                    <div class="flex items-center gap-6">
+                                        <div class="bg-img md:w-[100px] w-20 aspect-[3/4]">
+                                            <img src="{{ item.product.image.url }}" alt="img" class="w-full h-full object-cover rounded-lg">
+                                        </div>
+                                        <div>
+                                            <div class="text-title">{{ item.product.name }}</div>
+                                            <div class="list-select mt-3">
+                                                {% if item.variation %}
+                                                <div class="text-secondary2 capitalize">{{ item.variation }}</div>
+                                                {% else %}
+                                                <div class="text-secondary2">No variation</div>
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="w-1/12 price flex items-center justify-center">
-                                        <div class="text-title text-center">${{ item.product.price }}</div>
-                                    </div>
-                                    <div class="w-1/6 flex items-center justify-center">
-                                        <div class="quantity-block bg-surface md:p-3 p-2 flex items-center justify-between rounded-lg border border-line md:w-[100px] flex-shrink-0 w-20">
-                                            <i class="ph-bold ph-minus cursor-pointer text-base max-md:text-sm" data-item-id="{{ item.id }}"></i>
-                                            <div class="text-button quantity">{{ item.quantity }}</div>
-                                            <i class="ph-bold ph-plus cursor-pointer text-base max-md:text-sm" data-item-id="{{ item.id }}"></i>
-                                        </div>                                        
-                                    </div>
-                                    <div class="w-1/6 flex total-price items-center justify-center">
-                                        <div class="text-title text-center">${{ item_prices|get_item:item.id }}</div>
-                                    </div>
-                                    <div class="w-1/12 flex items-center justify-center">
-                                        <i class="remove-btn ph ph-x-circle text-xl max-md:text-base text-red cursor-pointer hover:text-black duration-300"></i>
+                                </div>
+                                <div class="w-1/12 price flex items-center justify-center">
+                                    <div class="text-title text-center">${{ item.product.price }}</div>
+                                </div>
+                                <div class="w-1/6 flex items-center justify-center">
+                                    <div class="quantity-block bg-surface md:p-3 p-2 flex items-center justify-between rounded-lg border border-line md:w-[100px] flex-shrink-0 w-20">
+                                        <i class="ph-bold ph-minus cursor-pointer text-base max-md:text-sm" data-item-id="{{ item.id }}"></i>
+                                        <div class="text-button quantity">{{ item.quantity }}</div>
+                                        <i class="ph-bold ph-plus cursor-pointer text-base max-md:text-sm" data-item-id="{{ item.id }}"></i>
                                     </div>
                                 </div>
+                                <div class="w-1/6 flex total-price items-center justify-center">
+                                    <div class="text-title text-center">${{ item_prices|get_item:item.id }}</div>
+                                </div>
+                                <div class="w-1/12 flex items-center justify-center">
+                                    <i class="remove-btn ph ph-x-circle text-xl max-md:text-base text-red cursor-pointer hover:text-black duration-300"></i>
+                                </div>
+                            </div>
                             {% endfor %}
                         </div>
                     </div>

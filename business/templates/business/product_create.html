@@ -29,7 +29,7 @@
     <div class="container">
         <div class="flex justify-between max-lg:flex-col gap-y-10">
             <div class="left lg:w-2/3 lg:pr-4">
-                <div class="heading3">Drop Us A Line</div>
+                <div class="heading3">Add your porduct</div>
                 <div class="body1 text-secondary2 mt-3">Use the form below to get in touch with the sales team</div>
                 <form class="md:mt-6 mt-4" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
@@ -37,7 +37,6 @@
                         <div class="name">
                             <input class="border-line px-4 py-3 w-full rounded-lg" id="product_name" type="text" name="name" placeholder="Product Name *" required />
                         </div>
-                        
                         <div class="price">
                             <input class="border-line px-4 py-3 w-full rounded-lg" id="product_price" type="number" step="0.01" name="price" placeholder="Product Price *" required />
                         </div>
@@ -64,12 +63,90 @@
                                 <label for="product_in_stock" class="ml-2">In Stock</label>
                             </div>
                         </div>
+                        <div class="has_variations sm:col-span-2">
+                            <div class="flex items-center">
+                                <input class="border-line px-4 py-3 rounded-lg" id="has_variations" type="checkbox" name="has_variations" />
+                                <label for="has_variations" class="ml-2">This product has variations (color, size)</label>
+                            </div>
+                        </div>
+                        <div id="variation_section" class="variations sm:col-span-2 hidden">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="variation-names">
+                                    <label>Variation Names</label>
+                                    <div class="flex flex-wrap">
+                                        {% for category, display_name in VAR_CATEGORIES %}
+                                        <div class="variation-name-item mr-2 mb-2">
+                                            <input class="border-line px-4 py-3 rounded-lg" type="checkbox" name="variation_names" value="{{ category }}" id="variation_name_{{ category }}">
+                                            <label for="variation_name_{{ category }}" class="ml-2">{{ display_name }}</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="variation-values">
+                                    <label>Variation Values</label>
+                                    <div id="variation_values_container" class="flex flex-wrap">
+                                        {% for category, display_name in VAR_CATEGORIES %}
+                                        <div class="variation-value-item mr-2 mb-2 hidden" id="variation_value_{{ category }}">
+                                            <input class="border-line px-4 py-3 rounded-lg" type="text" name="variation_values_{{ category }}" placeholder="Enter {{ display_name }} value" />
+                                            <input class="border-line px-4 py-3 rounded-lg" type="file" name="variation_images_{{ category }}" accept="image/*" placeholder="{{ display_name }} Image" />
+                                            <button type="button" class="add-variation-value-btn button-main bg-black hover:bg-green text-white rounded-full whitespace-nowrap py-3 px-4 rounded-lg" data-category="{{ category }}">Add {{ display_name }}</button>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="block-button md:mt-6 mt-4">
-                        <button class="button-main">Create Product</button>
+                        <button type="submit" class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">Create Product</button>
                     </div>
                 </form>
                 
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const hasVariationsCheckbox = document.getElementById('has_variations');
+                        const variationSection = document.getElementById('variation_section');
+                        const variationNameCheckboxes = document.querySelectorAll('input[name="variation_names"]');
+                        const variationValuesContainer = document.getElementById('variation_values_container');
+                
+                        hasVariationsCheckbox.addEventListener('change', function() {
+                            if (hasVariationsCheckbox.checked) {
+                                variationSection.classList.remove('hidden');
+                            } else {
+                                variationSection.classList.add('hidden');
+                            }
+                        });
+                
+                        variationNameCheckboxes.forEach(checkbox => {
+                            checkbox.addEventListener('change', function() {
+                                const category = checkbox.value;
+                                const variationValueItem = document.getElementById(`variation_value_${category}`);
+                                if (checkbox.checked) {
+                                    variationValueItem.classList.remove('hidden');
+                                } else {
+                                    variationValueItem.classList.add('hidden');
+                                }
+                            });
+                        });
+                
+                        variationValuesContainer.addEventListener('click', function(event) {
+                            if (event.target.classList.contains('add-variation-value-btn')) {
+                                const category = event.target.getAttribute('data-category');
+                                const variationValueItem = document.getElementById(`variation_value_${category}`);
+                                const newInput = document.createElement('div');
+                                newInput.classList.add('variation-value-input', 'mr-2', 'mb-2');
+                                newInput.innerHTML = `
+                                    <input class="border-line px-4 py-3 rounded-lg" type="text" name="variation_values_${category}" placeholder="Enter ${category} value" />
+                                    <input class="border-line px-4 py-3 rounded-lg" type="file" name="variation_images_${category}" accept="image/*" placeholder="${category} Image" />
+                                `;
+                                variationValueItem.appendChild(newInput);
+                            }
+                        });
+                    });
+                </script>
+                
+                
+
             </div>
             <div class="right lg:w-1/4 lg:pl-4">
                 <div class="item">
@@ -88,5 +165,7 @@
         </div>
     </div>
 </div>
+
+
 
 {% endblock content %}

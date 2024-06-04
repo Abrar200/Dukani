@@ -12,6 +12,8 @@
                 <i class='ph ph-caret-right text-xs text-secondary2'></i>
                 <a href="{% url "business_detail" business.business_slug %}"><div class='caption1 text-secondary2'>{{ business.business_name }}</div></a>
                 <i class='ph ph-caret-right text-xs text-secondary2'></i>
+                <a href="{% url "business_detail" product.business.business_slug %}"><div class='caption1 text-secondary2'>Products</div></a>
+                <i class='ph ph-caret-right text-xs text-secondary2'></i>
                 <div class='caption1 capitalize'>{{ product.name }}</div>
             </div>
             <div class="right flex items-center gap-3">
@@ -44,9 +46,23 @@
                             <!--  -->
                         <div class="swiper-slide popup-link swiper-slide-active" role="group" aria-label="1 / 4" style="width: 382px;">
                     <img src="{{ product.image.url }}" alt="img" class="w-full aspect-[3/4] object-cover">
-                </div><div class="swiper-slide popup-link swiper-slide-next" role="group" aria-label="2 / 4" style="width: 382px;">
+                </div>
+                <div class="swiper-slide popup-link swiper-slide-next" role="group" aria-label="2 / 4" style="width: 382px;">
                     <img src="{{ product.image2.url }}" alt="img" class="w-full aspect-[3/4] object-cover">
                 </div>
+                {% if product.variations.all %}
+                    {% for variation in product.variations.all %}
+                        {% if variation.name == 'color' %}
+                            {% for product_variation in variation.values.all %}
+                                {% if product_variation.image %}
+                                    <div class="swiper-slide popup-link swiper-slide-next" role="group" aria-label="2 / 4" style="width: 382px;">
+                                        <img src="{{ product_variation.image.url }}" alt="img" class="w-full aspect-[3/4] object-cover">
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
             </div>
                     <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span></div>
                     <div class="swiper mySwiper swiper-initialized swiper-horizontal swiper-watch-progress swiper-backface-hidden swiper-thumbs">
@@ -54,9 +70,24 @@
                             <!--  -->
                         <div class="swiper-slide swiper-slide-visible swiper-slide-fully-visible swiper-slide-active swiper-slide-thumb-active" role="group" aria-label="1 / 4" style="width: 382px;">
                     <img src="{{ product.image.url }}" alt="img" class="w-full aspect-[3/4] object-cover">
-                </div><div class="swiper-slide swiper-slide-visible swiper-slide-fully-visible swiper-slide-next" role="group" aria-label="2 / 4" style="width: 382px;">
+                </div>
+                <div class="swiper-slide swiper-slide-visible swiper-slide-fully-visible swiper-slide-next" role="group" aria-label="2 / 4" style="width: 382px;">
                     <img src="{{ product.image2.url }}" alt="img" class="w-full aspect-[3/4] object-cover">
-                </div></div>
+                </div>
+                {% if product.variations.all %}
+                    {% for variation in product.variations.all %}
+                        {% if variation.name == 'color' %}
+                            {% for product_variation in variation.values.all %}
+                                {% if product_variation.image %}
+                                <div class="swiper-slide swiper-slide-visible swiper-slide-fully-visible swiper-slide-next" role="group" aria-label="2 / 4" style="width: 382px;">
+                                    <img src="{{ product_variation.image.url }}" alt="img" class="w-full aspect-[3/4] object-cover">
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                </div>
                     <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span></div>
                 </div>
                 <div class="swiper popup-img">
@@ -94,54 +125,75 @@
                 </div>
                 <div class="flex items-center gap-3 flex-wrap mt-5 pb-6 border-b border-line">
                     <div class="product-price heading5">${{ product.price }}</div>
-                    <div class='w-px h-4 bg-line'></div>
-                    <div class="product-origin-price font-normal text-secondary2">
-                        <del>$32.00</del>
-                    </div>
-                    <div class="product-sale caption2 font-semibold bg-green px-3 py-0.5 inline-block rounded-full">
-                        -19%
-                    </div>
+                    
                     <div class='product-description text-secondary mt-3'>{{ product.description }}</div>
                 </div>
                 <div class="list-action mt-6">
                     {% if request.user.is_authenticated and request.user == business.seller %}
                         <a href="{% url 'product_edit' business.business_slug product.product_slug %}"><div
-                            class="">
+                            class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">
                             Edit Product
                         </div></a>
                     {% endif %}
-                    {% if product.has_variations %}
-                    <div class="choose-color mt-5">
-                        <div class="text-title">Colors: <span class='text-title color'></span>
-                        </div>
-                        <div class="list-color flex items-center gap-2 flex-wrap mt-3">
-                            <!-- color-item -->
-                        </div>
-                    </div>
-                    <div class="choose-size mt-5">
-                        <div class="heading flex items-center justify-between">
-                            <div class="text-title">Size: <span class='text-title size'></span>
+                    
+                    
+                    {% if color_variations %}
+                        <div class="choose-color mt-5">
+                            <div class="text-title">Colors:</div>
+                            <div class="list-color flex items-center gap-2 flex-wrap mt-3">
+                                {% for color_variation in color_variations %}
+                                    {% for product_variation in color_variation.values.all %}
+                                        <div class="color-item w-12 h-12 rounded-xl duration-300 relative"
+                                             data-color="{{ product_variation.value }}" 
+                                             data-variation-id="{{ product_variation.id }}">
+                                            {% if product_variation.image %}
+                                                <img style="width: 100%; height: 100%; object-fit: cover" 
+                                                     src="{{ product_variation.image.url }}" 
+                                                     alt="color" class="rounded-xl">
+                                            {% endif %}
+                                            <div class="tag-action bg-black text-white caption2 capitalize px-1.5 py-0.5 rounded-sm">
+                                                {{ product_variation.value }}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
                             </div>
-                            <div class="caption1 size-guide text-red underline">Size Guide</div>
                         </div>
-                        <div class="list-size flex items-center gap-2 flex-wrap mt-3">
-                            <!-- size-item -->
-                        </div>
-                    </div>
                     {% endif %}
+                    
+                    {% if size_variations %}
+                        <div class="choose-size mt-5">
+                            <div class="heading flex items-center justify-between">
+                                <div class="text-title">Sizes:</div>
+                                <div class="caption1 size-guide text-red underline">Size Guide</div>
+                            </div>
+                            <div class="list-size flex items-center gap-2 flex-wrap mt-3">
+                                {% for size_variation in size_variations %}
+                                    {% for product_variation in size_variation.values.all %}
+                                        <div class="size-item w-12 h-12 flex items-center justify-center text-button rounded-full bg-white border border-line"
+                                             data-size="{{ product_variation.value }}" 
+                                             data-variation-id="{{ product_variation.id }}">
+                                            {{ product_variation.value }}
+                                        </div>
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    
                     <div class="text-title mt-5">Quantity:</div>
                     <div class="choose-quantity flex items-center max-xl:flex-wrap lg:justify-between gap-5 mt-3">
-                        <div
-                            class="quantity-block md:p-3 max-md:py-1.5 max-md:px-3 flex items-center justify-between rounded-lg border border-line sm:w-[140px] w-[120px] flex-shrink-0">
+                        <div class="quantity-block md:p-3 max-md:py-1.5 max-md:px-3 flex items-center justify-between rounded-lg border border-line sm:w-[140px] w-[120px] flex-shrink-0">
                             <i class="ph-bold ph-minus cursor-pointer body1"></i>
                             <div class="quantity body1 font-semibold">1</div>
                             <i class="ph-bold ph-plus cursor-pointer body1"></i>
                         </div>
-                        <div
-                            class="add-cart-btn button-main whitespace-nowrap w-full text-center bg-white text-black border border-black" data-product-id="{{ product.id }}">
+                        <div class="add-cart-btn button-main whitespace-nowrap w-full text-center bg-white text-black border border-black" data-product-id="{{ product.id }}">
                             Add To Cart
                         </div>
-                    </div>
+                    </div>                    
+                                            
                     <div class="button-block mt-5">
                         <a href="checkout.html" class="button-main w-full text-center">Buy It Now</a>
                     </div>
@@ -160,23 +212,6 @@
                             <i class='ph ph-timer body1'></i>
                             <div class="text-title">Estimated Delivery:</div>
                             <div class="text-secondary">{{ product.min_delivery_time }} - {{ product.max_delivery_time }} Business Days</div>
-                        </div>
-                        <div class="flex items-center gap-1 mt-3">
-                            <i class='ph ph-eye body1'></i>
-                            <div class="text-title">38</div>
-                            <div class="text-secondary">people viewing this product right now!</div>
-                        </div>
-                        <div class="flex items-center gap-1 mt-3">
-                            <div class="text-title">SKU:</div>
-                            <div class="text-secondary">53453412</div>
-                        </div>
-                        <div class="flex items-center gap-1 mt-3">
-                            <div class="text-title">Categories:</div>
-                            <div class="list-category text-secondary">fashion, women</div>
-                        </div>
-                        <div class="flex items-center gap-1 mt-3">
-                            <div class="text-title">Tag:</div>
-                            <div class="list-tag text-secondary">top</div>
                         </div>
                     </div>
                     <div class="list-payment mt-7">
@@ -507,8 +542,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="text-button more-review-btn text-center mt-2 underline cursor-pointer">View More
-                    Comments</div>
             </div>
             <div id="form-review" class='form-review pt-6'>
                 <div class="heading4">Leave A comment</div>
