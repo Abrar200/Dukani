@@ -1,0 +1,88 @@
+{% extends "business/base.html" %}
+
+{% load static %}
+
+{% block slider %}
+
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Your Orders</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href='{% url "home" %}'>Homepage</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Your Orders</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock slider %}
+
+{% block content %}
+
+<div class="store-list md:py-20 py-10">
+    <div class="container">
+        <h1 class="text-3xl font-semibold mb-8">Your Orders</h1>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Placed On</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Note</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                        <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Refund</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for order in orders %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ order.ref_code }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ order.created_at }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${{ order.total_amount }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ order.address }}, {{ order.city }}, {{ order.state }}, {{ order.postal_code }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">{{ order.note }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <ul class="list-disc pl-5">
+                                {% for item in order.items.all %}
+                                    <li>
+                                        {{ item.quantity }} x {{ item.product.name }}
+                                        {% if item.variations %}
+                                        ({% for key, value in item.variations.items %}{{ key }}: {{ value }}{% if not forloop.last %}, {% endif %}{% endfor %})
+                                        {% endif %}
+                                        - ${{ item.price }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if order.refund_granted %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Refund Accepted
+                                </span>
+                            {% elif order.refund_requested %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    Refund Requested
+                                </span>
+                            {% else %}
+                                <a href="{% url 'request_refund' order.id %}" class="quick-view-btn button-main sm:py-1.5 py-1 sm:px-2.5 px-2 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-2.5">
+                                    Request Refund
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

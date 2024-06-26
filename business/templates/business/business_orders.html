@@ -1,0 +1,92 @@
+{% extends "business/base.html" %}
+
+{% load static %}
+
+{% block slider %}
+
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Your Orders</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href='{% url "home" %}'>Homepage</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Your Orders</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock slider %}
+
+{% block content %}
+
+<div class="container py-5">
+    <h1 class="text-3xl font-semibold mb-8">Orders for {{ business.business_name }}</h1>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Placed On</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Note</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Message Buyer</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for order_data in orders %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order_data.order.ref_code }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order_data.order.created_at }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${{ order_data.order.total_amount }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order_data.order.address }}, {{ order_data.order.city }}, {{ order_data.order.state }}, {{ order_data.order.postal_code }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order_data.order.note }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ order_data.order.get_order_status_display }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <ul class="list-disc pl-5">
+                            {% for item in order_data.items %}
+                                <li>
+                                    {{ item.quantity }} x {{ item.product.name }}
+                                    {% if item.variations %}
+                                    ({% for key, value in item.variations.items %}{{ key }}: {{ value }}{% if not forloop.last %}, {% endif %}{% endfor %})
+                                    {% endif %}
+                                    - ${{ item.price }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <form action="{% url 'business_orders' business.business_slug %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" value="{{ order_data.order.id }}">
+                            <select name="status" class="form-select bg-gray-200 border border-gray-300 rounded-md py-2 px-3">
+                                {% for key, value in order_data.order.ORDER_STATUS_CHOICES %}
+                                <option value="{{ key }}" {% if key == order_data.order.order_status %}selected{% endif %}>{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="quick-view-btn button-main sm:py-1.5 py-1 sm:px-2.5 px-2 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-2.5">Update Status</button>
+                        </form>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <form action="{% url 'message_buyer' order_data.order.user.username %}" method="get">
+                            <button type="submit" class="quick-view-btn button-main sm:py-1.5 py-1 sm:px-2.5 px-2 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-2.5">Message {{ order_data.order.user.username }}</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}

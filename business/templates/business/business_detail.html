@@ -10,7 +10,7 @@
 
 {% block content %}
 
-<div class='store-list' style="margin-top: 70px">
+<div class='store-list' style="margin-top: 120px">
     <div class="container">
         <div class="item bg-surface overflow-hidden rounded-[20px] flex flex-col md:flex-row">
             <div class="md:w-1/5 p-6 flex flex-row mr-4">
@@ -29,6 +29,24 @@
                             <div class="quick-view-btn button-main sm:py-1.5 py-1 sm:px-2.5 px-2 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-2.5">
                                 Message Seller
                             </div>
+                        </a>
+                    {% endif %}
+                    {% if request.user.is_authenticated and request.user == business.seller %}
+                        <form action="{% url 'delete_business' business.business_slug %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="quick-view-btn button-main sm:py-1.5 py-1 sm:px-2.5 px-2 bg-red hover:bg-green text-white rounded-full whitespace-nowrap mt-2.5">
+                                Delete Business
+                            </button>
+                        </form>
+                    {% endif %}
+                    {% if request.user.is_authenticated and request.user == business.seller %}
+                        <a href="{% url 'business_orders' business.business_slug %}">
+                            <button type="submit" class="quick-view-btn button-main sm:py-1.5 py-1 sm:px-2.5 px-2 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-2.5">
+                                Orders {% if business_order_count > 0 %}
+                                ({{ business_order_count }})
+                            {% endif %}
+                            </button>
+                            
                         </a>
                     {% endif %}
                 </div>
@@ -106,27 +124,36 @@
         <div class="container">
             <div class="list-product-block style-grid relative">
 
+                {% if messages %}
+                    <div class="container mt-3">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 {% if business.products %}
-                <div class="heading6 mt-7">Products</div>
+                
+                <div class="filter-heading flex items-center justify-between gap-5 flex-wrap">
+                    <div class="left flex has-line items-center flex-wrap gap-5">
+                        <div class="heading6 mt-7">Products</div>
+                        {% if request.user.is_authenticated and request.user == business.seller %}
+                            <a href="{% url 'product_create' business.business_slug %}"><div
+                                class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-6">
+                                Add Products
+                            </div></a>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <div class="list-product hide-product-sold grid sm:grid-cols-3 grid-cols-2 sm:gap-[30px] gap-[20px] mt-7 lg:grid-cols-4" data-item="12">
                     {% for product in products %}
                         <div class="product-item grid-type">
                             <div class="product-main cursor-pointer block" data-item="2">
                                 <div class="product-thumb bg-white relative overflow-hidden rounded-2xl">
                                     <div class="product-tag text-button-uppercase bg-green px-3 py-0.5 inline-block rounded-full absolute top-3 left-3 z-[1]">New</div>
-                                    <div class="list-action-right absolute top-3 right-3 max-lg:hidden">
-                                        <div class="add-wishlist-btn w-[32px] h-[32px] flex items-center justify-center rounded-full bg-white duration-300 relative">
-                                            <div class="tag-action bg-black text-white caption2 px-1.5 py-0.5 rounded-sm">
-                                                Add To Wishlist</div>
-                                            <i class="ph ph-heart text-lg"></i>
-                                        </div>
-                                        <div class="compare-btn w-[32px] h-[32px] flex items-center justify-center rounded-full bg-white duration-300 relative mt-2">
-                                            <div class="tag-action bg-black text-white caption2 px-1.5 py-0.5 rounded-sm">
-                                                Compare Product</div>
-                                            <i class="ph ph-arrow-counter-clockwise text-lg compare-icon"></i>
-                                            <i class="ph ph-check-circle text-lg checked-icon"></i>
-                                        </div>
-                                    </div>
                                     <div class="product-img w-full h-full aspect-[3/4]">
                                         <a href="{% url "product_detail" product.business.business_slug product.product_slug %}">
                                         <img key="0" class="w-full h-full object-cover duration-700" src="{{ product.image.url }}" alt="img"><img key="1" class="w-full h-full object-cover duration-700" src="{{ product.image2.url }}" alt="img">
@@ -370,7 +397,19 @@
                 {% endif %}
 
                 {% if business.services %}
-                <div class="heading6 mt-7">Services</div>
+               
+                <div class="filter-heading flex items-center justify-between gap-5 flex-wrap">
+                    <div class="left flex has-line items-center flex-wrap gap-5">
+                        <div class="heading6 mt-7">Services</div>
+                        {% if request.user.is_authenticated and request.user == business.seller %}
+                            <a href="{% url 'service_create' business.business_slug %}"><div
+                                class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-6">
+                                Add Services
+                            </div></a>
+                        {% endif %}
+                    </div>
+                </div>
+
                     <div class="list-product hide-product-sold grid sm:grid-cols-3 grid-cols-2 sm:gap-[30px] gap-[20px] mt-7 lg:grid-cols-4" data-item="12">
                         {% for service in services %}
                         <div class="product-item grid-type">

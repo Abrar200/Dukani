@@ -1,0 +1,13 @@
+<p>Dear {{ user.first_name }},</p>
+
+<p>Your order for</p>
+<ul>
+    {% for item in item_details %}
+    <li>{{ item }}</li>
+    {% endfor %}
+</ul>
+<p>from {{ business.business_name }} with reference number <strong>{{ order.ref_code }}</strong> has been <strong>shipped</strong>.</p>
+
+<p>Thank you for shopping with us!</p>
+
+<p>Best regards,<br>Dukani Ethnic Store</p>

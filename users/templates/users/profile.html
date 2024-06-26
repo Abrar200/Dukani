@@ -23,6 +23,16 @@
 
 {% endblock slider %}
 
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 {% block content %}
 
 <div class="my-account-block md:py-20 py-10">
@@ -50,11 +60,7 @@
                         {% endif %}
                         <div class="item px-5 py-4 flex items-center gap-3 cursor-pointer mt-2">
                             <i class="ph-bold ph-bag text-xl"></i>
-                            <div class="heading6">Your Orders</div>
-                        </div>
-                        <div class="item px-5 py-4 flex items-center gap-3 cursor-pointer mt-2">
-                            <i class="ph-bold ph-map-pin text-xl"></i>
-                            <div class="heading6">My Address</div>
+                            <a href="{% url "user_orders" %}"><div class="heading6">Your Orders</div></a>
                         </div>
                         <div class="item px-5 py-4 flex items-center gap-3 cursor-pointer mt-2">
                             <i class="ph-bold ph-sign-out text-xl"></i>
@@ -65,51 +71,25 @@
             </div>
             <div class="right xl:w-2/3 md:w-7/12 w-full xl:pl-[40px] lg:pl-[28px] md:pl-[16px] flex items-center">
                 <div class="text-content w-full">
-                    <form class="">
+                    <form method="post">
+                        {% csrf_token %}
                         <div class="heading5 pb-4">Information</div>
                         <div class='grid sm:grid-cols-2 gap-4 gap-y-5'>
-                            <div class="first-name ">
-                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="firstName"
-                                    type="text" placeholder='First name' required />
+                            <div class="first-name">
+                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="firstName" name="first_name" type="text" placeholder='First name' value="{{ first_name }}" required />
                             </div>
                             <div class="last-name">
-                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="lastName"
-                                    type="text" placeholder='Last name' required />
+                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="lastName" name="last_name" type="text" placeholder='Last name' value="{{ last_name }}" required />
                             </div>
-                            <div class="email ">
-                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="email" type="email"
-                                    placeholder="Email address" required />
+                            <div class="email">
+                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="email" name="email" type="email" placeholder="Email address" value="{{ email }}" required />
                             </div>
                             <div class="phone-number">
-                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="phoneNumber"
-                                    type="text" placeholder="Phone number" required />
+                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="username" name="username" type="text" placeholder="Username" value="{{ username }}" required />
                             </div>
-                            <div class="col-span-full select-block">
-                                <select class="border border-line px-4 py-3 w-full rounded-lg" id="region"
-                                    name="region">
-                                    <option value="default">Choose Country/Region</option>
-                                    <option value="India">India</option>
-                                    <option value="France">France</option>
-                                    <option value="Singapore">Singapore</option>
-                                </select>
-                                <i class="ph-bold ph-caret-down arrow-down text-xl"></i>
+                            <div class="block-button">
+                                <button type="submit" class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">Update Account</button>
                             </div>
-                        </div>
-                        <div class="heading5 pb-4 lg:mt-10 mt-6">Change Password</div>
-                        <div class="pass">
-                            <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="password"
-                                type="password" placeholder="Password *" required />
-                        </div>
-                        <div class="new-pass mt-5">
-                            <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="newPassword"
-                                type="password" placeholder="New Password *" required />
-                        </div>
-                        <div class="confirm-pass mt-5">
-                            <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="confirmPassword"
-                                type="password" placeholder="Confirm Password *" required />
-                        </div>
-                        <div class="block-button lg:mt-10 mt-6">
-                            <button class="button-main">Update Account</button>
                         </div>
                     </form>
                 </div>

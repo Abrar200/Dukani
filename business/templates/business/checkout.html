@@ -23,92 +23,46 @@
 
 {% endblock slider %}
 
+{% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
 {% block content %}
+
+<script src="https://js.stripe.com/v3/"></script>
 
 <div class="checkout-block md:py-20 py-10">
     <div class="container">
         <div class="content-main flex justify-between">
             <div class="left w-1/2">
-                <div class="login bg-surface py-3 px-4 flex justify-between rounded-lg">
-                    <div class="left flex items-center"><span class="text-on-surface-variant1 pr-4">Already have
-                            an account? </span><span
-                            class="text-button text-on-surface hover-underline cursor-pointer hover:underline">Login</span>
-                    </div>
-                    <div class="right"><i class="ph ph-caret-down fs-20 cursor-pointer"></i></div>
-                </div>
                 <div class="form-login-block mt-3">
-                    <form class="p-5 border border-line rounded-lg">
-                        <div class="grid sm:grid-cols-2 gap-5">
-                            <div class="email ">
-                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="username"
-                                    type="email" placeholder="Username or email" required />
-                            </div>
-                            <div class="pass ">
-                                <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="password"
-                                    type="password" placeholder="Password" required />
-                            </div>
-                        </div>
-                        <div class="block-button mt-3">
-                            <button class="button-main button-blue-hover">Login</button>
-                        </div>
-                    </form>
                 </div>
                 <div class="information mt-5">
                     <div class="heading5">Information</div>
                     <div class="form-checkout mt-5">
-                        <form>
-                            <div class="grid sm:grid-cols-2 gap-4 gap-y-5 flex-wrap">
-                                <div class="">
-                                    <input class="border-line px-4 py-3 w-full rounded-lg" id="firstName"
-                                        type="text" placeholder="First Name *" required />
+                        <form id="checkout-form">
+                            {% csrf_token %}
+                            <div class="grid sm:grid-cols-2 gap-5">
+                                <div class="email ">
+                                    <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="address" name="address" type="text" placeholder="Address *" required />
                                 </div>
-                                <div class="">
-                                    <input class="border-line px-4 py-3 w-full rounded-lg" id="lastName" type="text"
-                                        placeholder="Last Name *" required />
+                                <div class="email ">
+                                    <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="city" name="city" type="text" placeholder="City *" required />
                                 </div>
-                                <div class="">
-                                    <input class="border-line px-4 py-3 w-full rounded-lg" id="email" type="email"
-                                        placeholder="Email Address *" required />
+                                <div class="email ">
+                                    <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="state" name="state" type="text" placeholder="State *" required />
                                 </div>
-                                <div class="">
-                                    <input class="border-line px-4 py-3 w-full rounded-lg" id="phoneNumber"
-                                        type="number" placeholder="Phone Numbers *" required />
-                                </div>
-                                <div class="col-span-full select-block">
-                                    <select class="border border-line px-4 py-3 w-full rounded-lg" id="region"
-                                        name="region">
-                                        <option value="default">Choose Country/Region</option>
-                                        <option value="India">India</option>
-                                        <option value="France">France</option>
-                                        <option value="Singapore">Singapore</option>
-                                    </select>
-                                    <i class='ph ph-caret-down arrow-down'></i>
-                                </div>
-                                <div class="">
-                                    <input class="border-line px-4 py-3 w-full rounded-lg" id="city" type="text"
-                                        placeholder="Town/City *" required />
-                                </div>
-                                <div class="">
-                                    <input class="border-line px-4 py-3 w-full rounded-lg" id="apartment"
-                                        type="text" placeholder="Street,..." required />
-                                </div>
-                                <div class="select-block">
-                                    <select class="border border-line px-4 py-3 w-full rounded-lg" id="country"
-                                        name="country">
-                                        <option value="default">Choose State</option>
-                                        <option value="India">India</option>
-                                        <option value="France">France</option>
-                                        <option value="Singapore">Singapore</option>
-                                    </select>
-                                    <i class='ph ph-caret-down arrow-down'></i>
-                                </div>
-                                <div class="">
-                                    <input class="border-line px-4 py-3 w-full rounded-lg" id="postal" type="text"
-                                        placeholder="Postal Code *" required />
+                                <div class="email ">
+                                    <input class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="postal_code" name="postal_code" type="text" placeholder="Postal Code *" required />
                                 </div>
                                 <div class="col-span-full">
-                                    <textarea class="border border-line px-4 py-3 w-full rounded-lg" id="note"
-                                        name="note" placeholder="Write note..."></textarea>
+                                    <textarea class="border border-line px-4 py-3 w-full rounded-lg" id="note" name="note" placeholder="Write note..."></textarea>
                                 </div>
                             </div>
                             <div class="payment-block md:mt-10 mt-6">
@@ -116,156 +70,19 @@
                                 <div class="list-payment mt-5">
                                     <div class='type bg-surface p-5 border border-line rounded-lg' id="creditCardForm">
                                         <input class="cursor-pointer" type="radio" id="credit" name="payment" />
-                                        <label class="text-button pl-2 cursor-pointer" for="credit">Credit
-                                            Card</label>
+                                        <label class="text-button pl-2 cursor-pointer" for="credit">Credit Card</label>
                                         <div class="infor">
-                                            <div class="text-on-surface-variant1 pt-4">Make your payment directly
-                                                into our bank account. Your order will not be shipped until the
-                                                funds
-                                                have cleared in our account.</div>
-                                            <div class="row">
-                                                <div class="col-12 mt-3">
-                                                    <label for="cardNumberCredit">Card Numbers</label>
-                                                    <input
-                                                        class="cursor-pointer border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="text" id="cardNumberCredit"
-                                                        placeholder="ex.1234567290" />
-                                                </div>
-                                                <div class=" mt-3">
-                                                    <label for="dateCredit">Date</label>
-                                                    <input class="border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="date" id="dateCredit" name="date" />
-                                                </div>
-                                                <div class=" mt-3">
-                                                    <label for="ccvCredit">CCV</label>
-                                                    <input
-                                                        class="cursor-pointer border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="text" id="ccvCredit" placeholder="****" />
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-2 mt-3">
-                                                <input type="checkbox" id="saveCredit" name="save" />
-                                                <label class="text-button" for="saveCredit">Save Card
-                                                    Details</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class='type bg-surface p-5 border border-line rounded-lg mt-5'>
-                                        <input class="cursor-pointer" type="radio" id="delivery" name="payment" />
-                                        <label class="text-button pl-2 cursor-pointer" for="delivery">Cash on
-                                            delivery</label>
-                                        <div class="infor">
-                                            <div class="text-on-surface-variant1 pt-4">Make your payment directly
-                                                into our bank account. Your order will not be shipped until the
-                                                funds
-                                                have cleared in our account.</div>
-                                            <div class="row">
-                                                <div class="col-12 mt-3">
-                                                    <label for="cardNumberDelivery">Card Numbers</label>
-                                                    <input
-                                                        class="cursor-pointer border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="text" id="cardNumberDelivery"
-                                                        placeholder="ex.1234567290" />
-                                                </div>
-                                                <div class=" mt-3">
-                                                    <label for="dateDelivery">Date</label>
-                                                    <input class="border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="date" id="dateDelivery" name="date" />
-                                                </div>
-                                                <div class=" mt-3">
-                                                    <label for="ccvDelivery">CCV</label>
-                                                    <input
-                                                        class="cursor-pointer border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="text" id="ccvDelivery" placeholder="****" />
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-2 mt-3">
-                                                <input type="checkbox" id="saveDelivery" name="save" />
-                                                <label class="text-button" for="saveDelivery">Save Card
-                                                    Details</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class='type bg-surface p-5 border border-line rounded-lg mt-5'>
-                                        <input class="cursor-pointer" type="radio" id="apple" name="payment" />
-                                        <label class="text-button pl-2 cursor-pointer" for="apple">Apple
-                                            Pay</label>
-                                        <div class="infor">
-                                            <div class="text-on-surface-variant1 pt-4">Make your payment directly
-                                                into our bank account. Your order will not be shipped until the
-                                                funds
-                                                have cleared in our account.</div>
-                                            <div class="row">
-                                                <div class="col-12 mt-3">
-                                                    <label for="cardNumberApple">Card Numbers</label>
-                                                    <input
-                                                        class="cursor-pointer border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="text" id="cardNumberApple"
-                                                        placeholder="ex.1234567290" />
-                                                </div>
-                                                <div class=" mt-3">
-                                                    <label for="dateApple">Date</label>
-                                                    <input class="border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="date" id="dateApple" name="date" />
-                                                </div>
-                                                <div class=" mt-3">
-                                                    <label for="ccvApple">CCV</label>
-                                                    <input
-                                                        class="cursor-pointer border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="text" id="ccvApple" placeholder="****" />
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-2 mt-3">
-                                                <input type="checkbox" id="saveApple" name="save" />
-                                                <label class="text-button" for="saveApple">Save Card
-                                                    Details</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class='type bg-surface p-5 border border-line rounded-lg mt-5'>
-                                        <input class="cursor-pointer" type="radio" id="paypal" name="payment" />
-                                        <label class="text-button pl-2 cursor-pointer" for="paypal">PayPal</label>
-                                        <div class="infor">
-                                            <div class="text-on-surface-variant1 pt-4">Make your payment directly
-                                                into our bank account. Your order will not be shipped until the
-                                                funds
-                                                have cleared in our account.</div>
-                                            <div class="row">
-                                                <div class="col-12 mt-3">
-                                                    <label for="cardNumberPaypal">Card Numbers</label>
-                                                    <input
-                                                        class="cursor-pointer border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="text" id="cardNumberPaypal"
-                                                        placeholder="ex.1234567290" />
-                                                </div>
-                                                <div class=" mt-3">
-                                                    <label for="datePaypal">Date</label>
-                                                    <input class="border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="date" id="datePaypal" name="date" />
-                                                </div>
-                                                <div class=" mt-3">
-                                                    <label for="ccvPaypal">CCV</label>
-                                                    <input
-                                                        class="cursor-pointer border-line px-4 py-3 w-full rounded mt-2"
-                                                        type="text" id="ccvPaypal" placeholder="****" />
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-2 mt-3">
-                                                <input type="checkbox" id="savePaypal" name="save" />
-                                                <label class="text-button" for="savePaypal">Save Card
-                                                    Details</label>
-                                            </div>
+                                            <!-- Credit Card Info Fields -->
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="block-button md:mt-10 mt-6">
-                                <button class="button-main w-full">Payment</button>
+                                <button type="button" id="checkout-button" class="button-main w-full bg-black text-white whitespace-nowrap">Make Payment</button>
                             </div>
                         </form>
                     </div>
                 </div>
-
             </div>
             <div class="right w-5/12">
                 <div class="checkout-block">
@@ -273,9 +90,9 @@
                     <div class="list-product-checkout">
                         {% for item in cart_items %}
                         <div class="item flex items-center justify-between w-full pb-5 border-b border-line gap-6 mt-5">
-                        <div style="height: 120px" class="bg-img w-[100px] aspect-square flex-shrink-0 rounded-lg overflow-hidden">
-                            <img src="{{ item.product.image.url }}" alt="img" class="w-full h-full">
-                        </div>
+                            <div style="height: 120px" class="bg-img w-[100px] aspect-square flex-shrink-0 rounded-lg overflow-hidden">
+                                <img src="{{ item.product.image.url }}" alt="img" class="w-full h-full">
+                            </div>
                             <div class="flex items-center justify-between w-full">
                                 <div>
                                     <div class="name text-title">{{ item.product.name }}</div>
@@ -288,21 +105,11 @@
                                 <div class="text-title">
                                     <span class="quantity">{{ item.quantity }}</span>
                                     <span class="px-1">x</span>
-                                    <span>
-                                        ${{ item.product.price }}
-                                    </span>
+                                    <span>${{ item.product.price }}</span>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
-                    </div>
-                    <div class="discount-block py-5 flex justify-between border-b border-line">
-                        <div class="text-title">Discounts</div>
-                        <div class="text-title">-$<span class="discount">0</span><span>.00</span></div>
-                    </div>
-                    <div class="ship-block py-5 flex justify-between border-b border-line">
-                        <div class="text-title">Shipping</div>
-                        <div class="text-title">Free</div>
                     </div>
                     <div class="total-cart-block pt-5 flex justify-between">
                         <div class="heading5">Total</div>
@@ -313,5 +120,46 @@
         </div>
     </div>
 </div>
+
+<script>
+    const stripe = Stripe("{{ stripe_public_key }}");
+    const checkoutButton = document.getElementById("checkout-button");
+
+    checkoutButton.addEventListener("click", function () {
+        const formData = new FormData(document.getElementById("checkout-form"));
+        const data = {};
+        formData.forEach((value, key) => (data[key] = value));
+    
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    
+        console.log("Form Data:", data);
+    
+        fetch("{% url 'checkout' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(session => {
+            if (session.error) {
+                alert(session.error);
+            } else {
+                return stripe.redirectToCheckout({ sessionId: session.id });
+            }
+        })
+        .then(result => {
+            if (result.error) {
+                alert(result.error.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+    });
+</script>
+
 
 {% endblock content %}

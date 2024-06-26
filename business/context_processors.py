@@ -1,5 +1,9 @@
 from collections import defaultdict
-from .models import Cart, CartItemVariation
+from .models import Product, Cart, CartItemVariation, Message, Order
+from django.db.models import Sum
+from django.contrib.messages import get_messages
+import logging
+from django.db.models import Q
 
 def cart_data(request):
     if request.user.is_authenticated:
@@ -31,4 +35,49 @@ def cart_data(request):
         'total_price': total_price,
         'item_prices': item_prices,
         'cart_variations': cart_variations,
+    }
+
+
+
+def cart_item_count(request):
+    if request.user.is_authenticated:
+        cart_items = Cart.objects.filter(user=request.user).aggregate(total_quantity=Sum('quantity'))
+        return {'cart_item_count': cart_items['total_quantity'] or 0}
+    else:
+        return {'cart_item_count': 0}
+
+
+
+
+def unread_message_count(request):
+    if request.user.is_authenticated:
+        unread_count = Message.objects.filter(
+            recipient=request.user, 
+            is_read=False
+        ).filter(
+            Q(business__isnull=True) | Q(business__isnull=False)
+        ).count()
+    else:
+        unread_count = 0
+    return {
+        'unread_message_count': unread_count,
+    }
+    
+
+
+
+
+def business_order_count(request):
+    order_count = 0
+    if request.user.is_authenticated and hasattr(request.user, 'business'):
+        business = request.user.business
+        order_count = Order.objects.filter(items__product__business=business, order_status='ordered').distinct().count()
+    return {'business_order_count': order_count}
+
+
+
+def popular_products(request):
+    popular_products = Product.objects.filter(is_popular=True)
+    return {
+        'popular_products': popular_products
     }

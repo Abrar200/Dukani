@@ -34,13 +34,14 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
-        'business': {
+        'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',  # Change this to 'INFO' to avoid debug messages
         },
     },
 }
@@ -67,6 +68,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'business.middleware.NoDebugMessagesMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'business.middleware.AjaxMiddleware',
 ]
@@ -85,6 +87,10 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'business.context_processors.cart_data',
+                'business.context_processors.cart_item_count',
+                'business.context_processors.unread_message_count',
+                'business.context_processors.business_order_count',
+                'business.context_processors.popular_products',
             ],
         },
     },
@@ -92,6 +98,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecom.wsgi.application'
 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP server host
+EMAIL_PORT = 587  # Replace with your SMTP server port
+EMAIL_USE_TLS = True  # Use TLS encryption
+EMAIL_HOST_USER = 'abrarshahriar367@gmail.com'  # Replace with your email address
+EMAIL_HOST_PASSWORD = 'c1519780100'  # Replace with your email password
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -123,12 +136,18 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# settings.py
+STRIPE_SECRET_KEY = 'sk_test_51P4gElP9SsicgG1jiHrOYu86MB4PNBRKMTxSgCHrCpPGaWrs68tkgtsUMx8CBZ7Nv0BXd9nFMAyuia4mSEo60Tdj00iH6Li1dk'
+STRIPE_PUBLIC_KEY = 'pk_test_51P4gElP9SsicgG1jB3b9vewTDC2pbRh3YOUKAaavO88BIFyqQgIg3FJzmy9NDwitrtwS8BXHUYhG2R2WtuuqfLFw00ZdmOuvHt'
+
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.mail.yahoo.com'  # Replace with your SMTP server host
-EMAIL_PORT = 587  # Replace with your SMTP server port
-EMAIL_USE_TLS = True  # Use TLS encryption
-EMAIL_HOST_USER = 'abrarshahriar360@yahoo.com'  # Replace with your email address
-EMAIL_HOST_PASSWORD = 'ledckffccuhucwnn'  # Replace with your email password
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp-mail.outlook.com'
+EMAIL_HOST_USER = "dukaniethnicstore@outlook.com"
+EMAIL_HOST_PASSWORD = "dukaniemail123)"
+DEFAULT_FROM_EMAIL = "dukaniethnicstore@outlook.com"
 
 
 # Internationalization
@@ -147,6 +166,10 @@ USE_TZ = True
 STRIPE_SECRET_KEY = 'sk_test_51P4gElP9SsicgG1jiHrOYu86MB4PNBRKMTxSgCHrCpPGaWrs68tkgtsUMx8CBZ7Nv0BXd9nFMAyuia4mSEo60Tdj00iH6Li1dk'
 STRIPE_PUBLIC_KEY = 'pk_test_51P4gElP9SsicgG1jB3b9vewTDC2pbRh3YOUKAaavO88BIFyqQgIg3FJzmy9NDwitrtwS8BXHUYhG2R2WtuuqfLFw00ZdmOuvHt'
 
+
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = ''
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

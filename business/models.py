@@ -4,6 +4,9 @@ from django.utils.text import slugify
 from django.core.serializers import serialize
 import json
 from django.utils import timezone
+from django.db.models import Avg, Count
+from django.db.models import JSONField
+from django.utils.translation import gettext_lazy as _
 
 class Country(models.Model):
     name = models.CharField(max_length=300)
@@ -30,7 +33,7 @@ class Business(models.Model):
     business_slug = models.SlugField(unique=True, blank=True)
     business_type = models.CharField(max_length=20, choices=BUSINESS_TYPE_CHOICES)
     countries = models.ManyToManyField(Country)
-    states = models.ManyToManyField(State)  # Add this line
+    states = models.ManyToManyField(State)
     address = models.CharField(max_length=200)
     phone = models.CharField(max_length=20)
     website = models.URLField(blank=True, null=True)
@@ -38,6 +41,7 @@ class Business(models.Model):
     profile_picture = models.ImageField(upload_to='business_profiles/', blank=True, null=True)
     banner_image = models.ImageField(upload_to='business_banners/', blank=True, null=True)
     is_featured = models.BooleanField(default=False)
+    stripe_account_id = models.CharField(max_length=255, blank=True, null=True)  # Add this line
 
     def __str__(self):
         return self.business_name
@@ -74,6 +78,34 @@ class OpeningHour(models.Model):
 
 
 class Product(models.Model):
+    class Category(models.TextChoices):
+        ELECTRONICS = 'EL', _('Electronics')
+        CLOTHING = 'CL', _('Clothing, Shoes & Jewelry')
+        BOOKS = 'BK', _('Books')
+        HOME = 'HM', _('Home & Kitchen')
+        BEAUTY = 'BE', _('Beauty & Personal Care')
+        TOYS = 'TY', _('Toys & Games')
+        SPORTS = 'SP', _('Sports & Outdoors')
+        AUTOMOTIVE = 'AU', _('Automotive')
+        HEALTH = 'HE', _('Health & Household')
+        GROCERY = 'GR', _('Grocery & Gourmet Food')
+        PET_SUPPLIES = 'PT', _('Pet Supplies')
+        OFFICE = 'OF', _('Office Products')
+        TOOLS = 'TL', _('Tools & Home Improvement')
+        MOVIES = 'MV', _('Movies & TV')
+        GARDEN = 'GD', _('Garden & Outdoor')
+        HANDMADE = 'HN', _('Handmade')
+        BABY = 'BA', _('Baby')
+        INDUSTRIAL = 'IN', _('Industrial & Scientific')
+        ARTS = 'AR', _('Arts, Crafts & Sewing')
+        MUSIC = 'MU', _('Musical Instruments')
+        OTHER = 'OT', _('Other')
+
+    category = models.CharField(
+        max_length=2,
+        choices=Category.choices,
+        default=Category.OTHER,
+    )
     name = models.CharField(max_length=100)
     product_slug = models.SlugField(unique=True, blank=True)
     description = models.TextField()
@@ -84,6 +116,8 @@ class Product(models.Model):
     in_stock = models.BooleanField(default=True)
     is_popular = models.BooleanField(default=False)
     is_best_seller = models.BooleanField(default=False)
+    trending = models.BooleanField(default=False)
+    new_releases = models.BooleanField(default=False)
     min_delivery_time = models.PositiveIntegerField(null=True, help_text="Minimum estimated delivery time in business days")
     max_delivery_time = models.PositiveIntegerField(null=True, help_text="Maximum estimated delivery time in business days")
     has_variations = models.BooleanField(default=False)
@@ -108,6 +142,18 @@ class Product(models.Model):
             self.product_slug = slugify(self.name)
         super().save(*args, **kwargs)
 
+    @property
+    def overall_review(self):
+        avg_rating = self.reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else 0
+
+    def star_rating_percentage(self, star):
+        total_reviews = self.reviews.count()
+        if total_reviews == 0:
+            return 0
+        star_count = self.reviews.filter(rating=star).count()
+        return round((star_count / total_reviews) * 100)
+
 
 VAR_CATEGORIES = (
     ('size', 'Size'),
@@ -131,6 +177,22 @@ class ProductVariation(models.Model):
 
     def __str__(self):
         return f"{self.variation.product.name} - {self.variation.get_name_display()} - {self.value}"
+    
+
+class ProductReview(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    review_text = models.TextField()
+    rating = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Review by {self.user.username} on {self.product.name}'
+
+    @property
+    def date(self):
+        return (timezone.now() - self.created_at).days
+
 
 class Cart(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='cart')
@@ -166,17 +228,51 @@ class Service(models.Model):
         if not self.service_slug:
             self.service_slug = slugify(self.name)
         super().save(*args, **kwargs)
+
     
 
 class Order(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    shipping_address = models.CharField(max_length=200)
+    ORDER_STATUS_CHOICES = [
+        ('ordered', 'ordered'),
+        ('shipped', 'shipped'),
+        ('delivered', 'delivered'),
+    ]
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='orders')
+    ref_code = models.CharField(max_length=20, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    address = models.CharField(max_length=255, null=True)
+    city = models.CharField(max_length=100, null=True)
+    state = models.CharField(max_length=100, null=True)
+    postal_code = models.CharField(max_length=20, null=True)
+    note = models.TextField(null=True, blank=True)
+    refund_requested = models.BooleanField(default=False)
+    refund_granted = models.BooleanField(default=False)
+    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default="ordered")
+    
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    variations = JSONField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.quantity} of {self.product.name} ({', '.join([f'{k}: {v}' for k, v in self.variations.items()]) if self.variations else ''})"
+    
+
+class Refund(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    reason = models.TextField()
+    email = models.EmailField()
+    accepted = models.BooleanField(default=False)
+
+
+    def __str__(self):
+        return f"{self.pk}"
 
 
 class Message(models.Model):
@@ -188,7 +284,7 @@ class Message(models.Model):
     is_read = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'Message from {self.sender} to {self.recipient} in {self.business}'
+        return f''
 
     @property
     def sender_is_business(self):

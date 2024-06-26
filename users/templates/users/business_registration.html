@@ -23,6 +23,16 @@
 
 {% endblock slider %}
 
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 {% block content %}
 
 <div class="login-block md:py-20 py-10">
@@ -94,6 +104,10 @@
                         <div class='flex items-center'>
                             <a href='#!' class='font-semibold hover:underline'>Terms and Conditions</a>
                         </div>
+                    </div>
+                    <div class="mt-5">
+                        <h3 class="text-lg font-semibold mb-3">Stripe Connect</h3>
+                        <p>Please complete your Stripe Connect account setup to receive payments.</p>
                     </div>
                     <div class="block-button md:mt-7 mt-4">
                         <button class="button-main">Register Business</button>

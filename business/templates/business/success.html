@@ -1,0 +1,48 @@
+{% extends "business/base.html" %}
+
+{% load static %}
+
+{% block slider %}
+
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Payment Successful</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href='index-2.html'>Homepage</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Payment Successful</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock slider %}
+
+{% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% block content %}
+
+<div class="store-list md:py-20 py-10">
+    <div class="container">
+        <h1 class="text-3xl font-semibold mb-8">Order Successful!</h1>
+        <div class="overflow-x-auto">
+        <p>Thank you for your purchase. Your order has been successfully placed.</p>
+        <a href="{% url 'user_orders' %}">View Your Orders</a>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
