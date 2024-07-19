@@ -99,13 +99,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ecom.wsgi.application'
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Replace with your SMTP server host
-EMAIL_PORT = 587  # Replace with your SMTP server port
-EMAIL_USE_TLS = True  # Use TLS encryption
-EMAIL_HOST_USER = 'abrarshahriar367@gmail.com'  # Replace with your email address
-EMAIL_HOST_PASSWORD = 'c1519780100'  # Replace with your email password
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -136,11 +129,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# settings.py
-STRIPE_SECRET_KEY = 'sk_test_51P4gElP9SsicgG1jiHrOYu86MB4PNBRKMTxSgCHrCpPGaWrs68tkgtsUMx8CBZ7Nv0BXd9nFMAyuia4mSEo60Tdj00iH6Li1dk'
-STRIPE_PUBLIC_KEY = 'pk_test_51P4gElP9SsicgG1jB3b9vewTDC2pbRh3YOUKAaavO88BIFyqQgIg3FJzmy9NDwitrtwS8BXHUYhG2R2WtuuqfLFw00ZdmOuvHt'
-
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -155,16 +143,18 @@ DEFAULT_FROM_EMAIL = "dukaniethnicstore@outlook.com"
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Australia/Adelaide'
 
 USE_I18N = True
 
 USE_TZ = True
 
 
+
+
 # Stripe settings
-STRIPE_SECRET_KEY = 'sk_test_51P4gElP9SsicgG1jiHrOYu86MB4PNBRKMTxSgCHrCpPGaWrs68tkgtsUMx8CBZ7Nv0BXd9nFMAyuia4mSEo60Tdj00iH6Li1dk'
-STRIPE_PUBLIC_KEY = 'pk_test_51P4gElP9SsicgG1jB3b9vewTDC2pbRh3YOUKAaavO88BIFyqQgIg3FJzmy9NDwitrtwS8BXHUYhG2R2WtuuqfLFw00ZdmOuvHt'
+STRIPE_SECRET_KEY = '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'
+STRIPE_PUBLIC_KEY = 'pk_live_51PVl0mRvafFWMAqoRdQSQ6c7bjc4ygSkDWh7fMGk9iiT9xQKw0tbaiKy6QTQvllVMc8E471xMA4O4qhTQXuNmi3X00siAayXXj'
 
 
 
@@ -182,8 +172,9 @@ STATICFILES_DIRs = [
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/'
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

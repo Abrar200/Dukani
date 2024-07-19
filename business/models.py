@@ -8,9 +8,11 @@ from django.db.models import Avg, Count
 from django.db.models import JSONField
 from django.utils.translation import gettext_lazy as _
 
+
 class Country(models.Model):
     name = models.CharField(max_length=300)
     image = models.ImageField(upload_to="country_images/")
+    is_featured = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -75,6 +77,7 @@ class OpeningHour(models.Model):
         else:
             return f"{self.business.business_name} - {self.get_day_display()} ({self.opening_time} - {self.closing_time})"
     
+
 
 
 class Product(models.Model):
@@ -229,7 +232,7 @@ class Service(models.Model):
             self.service_slug = slugify(self.name)
         super().save(*args, **kwargs)
 
-    
+
 
 class Order(models.Model):
     ORDER_STATUS_CHOICES = [

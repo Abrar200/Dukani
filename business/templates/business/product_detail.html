@@ -185,16 +185,21 @@
                         </div>
                     {% endif %}
                     
-                    <div class="choose-quantity flex items-center max-xl:flex-wrap lg:justify-between gap-5 mt-3">
-                        
-                        <div class="add-cart-btn button-main whitespace-nowrap w-full text-center bg-white text-black border border-black" data-product-id="{{ product.id }}">
-                            Add To Cart
+                    {% if product.in_stock %}
+                        <div class="choose-quantity flex items-center max-xl:flex-wrap lg:justify-between gap-5 mt-3">
+                            <div class="add-cart-btn button-main whitespace-nowrap w-full text-center bg-white text-black border border-black" data-product-id="{{ product.id }}">
+                                Add To Cart
+                            </div>
+                        </div>                      
+                                                            
+                        <div class="button-block mt-5">
+                            <a href="{% url 'quick_shop' product.product_slug %}" class="button-main w-full text-center">Buy It Now</a>
                         </div>
-                    </div>                      
-                                            
-                    <div class="button-block mt-5">
-                        <a href="checkout.html" class="button-main w-full text-center">Buy It Now</a>
-                    </div>
+                    {% else %}
+                        <div class="out-of-stock-message mt-5 text-center text-red-600 font-bold">
+                            This product is currently out of stock.
+                        </div>
+                    {% endif %}
                     <div class="more-infor mt-6">
                         <div class="flex items-center gap-4 flex-wrap">
                             <div class="flex items-center gap-1">

@@ -63,16 +63,18 @@
                         <i class="ph-bold ph-caret-down arrow-down text-xl"></i>
                     </div>
                     <div class="col-span-full select-block mt-5">
-                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="region" name="country">
-                            <option value="default">Choose Country/Region *</option>
+                        <label>Countries/Regions *</label>
+                        <div class="grid grid-cols-2 gap-4">
                             {% for country in countries %}
-                            <option value="{{ country.id }}" {% if business.countries.first == country %}selected{% endif %}>{{ country.name }}</option>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="countries" id="country-{{ country.id }}" value="{{ country.id }}" {% if country in business.countries.all %}checked{% endif %} class="mr-2">
+                                <label for="country-{{ country.id }}" class="cursor-pointer">{{ country.name }}</label>
+                            </div>
                             {% endfor %}
-                        </select>
-                        <i class="ph-bold ph-caret-down arrow-down text-xl"></i>
+                        </div>
                     </div>
                     <div class="col-span-full select-block mt-5">
-                        <label>States (Optional)</label>
+                        <label>States</label>
                         <div class="grid grid-cols-2 gap-4">
                             {% for state in states %}
                             <div class="flex items-center">

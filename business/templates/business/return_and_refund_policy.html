@@ -1,0 +1,112 @@
+{% extends "business/base.html" %}
+
+{% load static %}
+
+
+{% block slider %}
+
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Return and Refund Policy</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href="{% url 'home' %}">Homepage</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Return and Refund Policy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock slider %}
+
+{% block content %}
+
+<div class="return-refund-policy login-block md:py-20 py-10">
+    <div class="container">
+        <div class="policy-header mb-8">
+            <h1 class="text-3xl font-bold mb-4">Return and Refund Policy</h1>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">1. Introduction</h2>
+            <p>At Dukani Ethnic Store, we value your satisfaction and aim to provide the best possible shopping experience. This Return and Refund Policy outlines our procedures for returns, refunds, and the process for requesting them.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">2. Return Eligibility</h2>
+            <p class="mb-2">To be eligible for a return, please ensure that:</p>
+            <ul class="list-disc pl-6">
+                <li>The item is unused and in the same condition that you received it</li>
+                <li>The item is in its original packaging</li>
+                <li>You have the receipt or proof of purchase</li>
+                <li>The return is initiated within 14 days of receiving the item</li>
+            </ul>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">3. Non-Returnable Items</h2>
+            <p class="mb-2">The following items cannot be returned:</p>
+            <ul class="list-disc pl-6">
+                <li>Perishable goods</li>
+                <li>Custom-made or personalized items</li>
+                <li>Digital products</li>
+                <li>Gift cards</li>
+                <li>Intimate or sanitary goods, once unsealed</li>
+            </ul>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">4. Refund Process</h2>
+            <p class="mb-2">To request a refund, please follow these steps:</p>
+            <ol class="list-decimal pl-6">
+                <li>Log in to your Dukani Ethnic Store account</li>
+                <li>Navigate to the order for which you're requesting a refund</li>
+                <li>Click on "Request Refund" and provide your reasoning</li>
+                <li>Submit your request</li>
+            </ol>
+            <p class="mt-2">Once submitted, we will send your refund request and reasoning to the business owner for review. The business owner will then make a decision regarding your refund request.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">5. Refund Approval and Processing</h2>
+            <p>If your refund is approved, it will be processed through the original payment method used for the purchase. Please note that it may take 5-10 business days for the refund to appear in your account, depending on your payment provider.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">6. Shipping Costs</h2>
+            <p>Shipping costs for returning items are the responsibility of the customer, unless the return is due to our error (you received an incorrect or defective item).</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">7. Damaged or Defective Items</h2>
+            <p>If you receive a damaged or defective item, please contact us immediately. We will work with you to resolve the issue, which may include replacing the item or providing a full refund, including shipping costs.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">8. Cancellations</h2>
+            <p>For orders that have not yet shipped, you may request a cancellation. Please contact us as soon as possible with your order number and cancellation request.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">9. Contact Us</h2>
+            <p class="mb-2">If you have any questions about our Return and Refund Policy, please contact us at:</p>
+            <p>
+                Dukani Ethnic Store<br>
+                Email: dukaniethnicstore@outlook.com
+            </p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">10. Changes to This Policy</h2>
+            <p>We reserve the right to modify this policy at any time. Changes and clarifications will take effect immediately upon their posting on the website.</p>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -112,6 +112,7 @@
 
 	<div class="banner-block md:pt-20 pt-10">
         <div class="container">
+            <div class="heading4">Shop by Country</div>
             <div class="list-banner grid lg:grid-cols-4 sm:grid-cols-2 lg:gap-[30px] gap-[20px]">
 				{% for country in countries %}
                     <a href="{% url 'community' %}?country={{ country.id }}" class="banner-item relative block duration-500">
@@ -176,27 +177,52 @@
             <div class="heading4 mb-6">Products</div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[20px] lg:gap-[30px]">
                 {% for product in products %}
-                    <div class="product-item">
-                        <div class="product-main cursor-pointer block">
-                            <div class="product-thumb bg-white relative overflow-hidden rounded-2xl">
-                                <div class="product-tag text-button-uppercase bg-green px-3 py-0.5 inline-block rounded-full absolute top-3 left-3 z-[1]">New</div>
-                                <div class="product-img w-full h-full aspect-[3/4]">
-                                    <a href="{% url 'product_detail' product.business.business_slug product.product_slug %}">
-                                        <img key="0" class="w-full h-full object-cover duration-700" src="{{ product.image.url }}" alt="img"><img key="1" class="w-full h-full object-cover duration-700" src="{{ product.image2.url }}" alt="img">
-                                    </a>
+                        <div data-item="2" class="product-item grid-type">
+                            <div class="product-main cursor-pointer block" data-item="2">
+                                <div class="product-thumb bg-white relative overflow-hidden rounded-2xl">
+                                    <div class="product-tag text-button-uppercase bg-green px-3 py-0.5 inline-block rounded-full absolute top-3 left-3 z-[1]">New</div>
+                                    <div class="list-action-right absolute top-3 right-3 max-lg:hidden"></div>
+                                    <div class="product-img w-full h-full aspect-[3/4]">
+                                        <a href="{% url "product_detail" product.business.business_slug product.product_slug %}">
+                                            <img key="0" class="w-full h-full object-cover duration-700" src="{{ product.image.url }}" alt="img">
+                                            <img key="1" class="w-full h-full object-cover duration-700" src="{{ product.image2.url }}" alt="img">
+                                        </a>
+                                    </div>
+                                    <div class="list-action grid grid-cols-2 gap-3 px-5 absolute w-full bottom-5 max-lg:hidden">
+                                        <a href="{% url "product_detail" product.business.business_slug product.product_slug %}">
+                                            <div class="quick-view-btn w-full text-button-uppercase py-2 text-center rounded-full duration-300 bg-white hover:bg-black hover:text-white">
+                                                Quick View
+                                            </div>
+                                        </a>
+                                        <a href="{% url 'quick_shop' product.product_slug %}">
+                                            <div class="quick-shop-btn text-button-uppercase py-2 text-center rounded-full duration-500 bg-white hover:bg-black hover:text-white">
+                                                Quick Buy
+                                            </div>
+                                        </a>
+                                        <div class="quick-shop-block absolute left-5 right-5 bg-white p-5 rounded-[20px]">
+                                            <div class="list-size flex items-center justify-center flex-wrap gap-2">
+                                                <div key="0" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XS</div>
+                                                <div key="1" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">S</div>
+                                                <div key="2" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">M</div>
+                                                <div key="3" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">L</div>
+                                                <div key="4" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XL</div>
+                                                <div key="5" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">2XL</div>
+                                            </div>
+                                            <div class="add-cart-btn button-main w-full text-center rounded-full py-3 mt-4">Add To cart</div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="product-infor mt-4 lg:mb-7">
-                                <a href="{% url 'product_detail' product.business.business_slug product.product_slug %}">
-                                    <div class="product-name text-title duration-300">{{ product.name }}</div>
-                                </a>
-                                <div class="product-price-block flex items-center gap-2 flex-wrap mt-1 duration-300 relative z-[1]">
-                                    <div class="product-price text-title">${{ product.price }}</div>
+                                <div class="product-infor mt-4 lg:mb-7">
+                                    <a href="{% url "product_detail" product.business.business_slug product.product_slug %}">
+                                        <div class="product-name text-title duration-300">{{ product.name }}</div>
+                                    </a>
+                                    <div class="product-price-block flex items-center gap-2 flex-wrap mt-1 duration-300 relative z-[1]">
+                                        <div class="product-price text-title">${{ product.price }}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
             </div>
         </div>
     </div>

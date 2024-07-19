@@ -92,6 +92,26 @@
                         </a>
                     {% endif %}
                 </div>
+
+                <div class="w-1/4 mr-8" style="margin-top: 10px; margin-bottom: 10px;">
+                    <div class="list-featrue">
+                        <div class="item">
+                            <div class="heading6">Opening Hours:</div>
+                            {% for opening_hour in opening_hours %}
+                            <div class="flex items-center mt-2">
+                                <div class="text-secondary whitespace-nowrap">{{ opening_hour.get_day_display }}:</div>
+                                {% if opening_hour.is_closed %}
+                                <div class='text-title text-black whitespace-nowrap ml-2'>Closed</div>
+                                {% else %}
+                                {% with opening_time=opening_hour.opening_time|time:"g:sa" closing_time=opening_hour.closing_time|time:"g:sa" %}
+                                <div class='text-black whitespace-nowrap ml-2'><b>{{ opening_time }} - {{ closing_time }}</b></div>
+                                {% endwith %}
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

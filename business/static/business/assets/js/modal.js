@@ -23,15 +23,7 @@ userIcon.addEventListener('click', () => {
   loginPopup.classList.toggle('show');
 });
 
-// Wishlist icon and modal
-wishlistIcon.addEventListener('click', () => {
-  wishlistModal.classList.add('show');
-});
 
-const closeWishlistModal = wishlistModal.querySelector('.close-btn');
-closeWishlistModal.addEventListener('click', () => {
-  wishlistModal.classList.remove('show');
-});
 
 // Cart icon and modal
 cartIcon.addEventListener('click', () => {

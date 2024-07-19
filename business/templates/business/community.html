@@ -3,7 +3,6 @@
 {% load static %}
 
 {% block slider %}
-
 <div class="breadcrumb-block style-img">
     <div class="breadcrumb-main bg-linear overflow-hidden">
         <div class="container lg:pt-[134px] pt-24 pb-10 relative">
@@ -20,7 +19,6 @@
         </div>
     </div>
 </div>
-
 {% endblock slider %}
 
 {% if messages %}
@@ -34,218 +32,153 @@
 {% endif %}
 
 {% block content %}
-
 <div class="shop-product breadcrumb1 lg:py-20 md:py-14 py-10">
-    <div class="container">
-        <div class="flex max-md:flex-wrap max-md:flex-col-reverse gap-y-8">
-            <div class='sidebar lg:w-1/4 md:w-1/3 w-full md:pr-12'>
-                <div class="choose-color">
-                    <a href="{% url "events" %}">
-                        <div class="heading6">Respond to events happening near you!
-                        </div>
-                    </a>
-                </div>
-                <form id="filter-form" method="get" class="mb-4">
-                    <div class="filter-brand pb-8 mt-8">
-                        <div class="heading6">Countries</div>
-                        <div class="list-brand mt-4">
-                            {% for country in countries %}
-                            <div class="brand-item flex items-center justify-between" data-item="countries">
-                                <div class="left flex items-center cursor-pointer">
-                                    <div class="block-input">
-                                        <input type="checkbox" name="country" id="country-{{ country.id }}" value="{{ country.id }}" {% if country.id|stringformat:"i" in selected_countries %}checked{% endif %} />
-                                        <i class='ph-fill ph-check-square icon-checkbox text-2xl'></i>
-                                    </div>
-                                    <label for="country-{{ country.id }}" class="brand-name capitalize pl-2 cursor-pointer">{{ country.name }}</label>
-                                </div>
-                                <div class='text-secondary2 number'>
-                                    {{ country.business_set.count }}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="heading6 mt-8">States</div>
-                        <div class="list-brand mt-4">
-                            {% for state in states %}
-                            <div class="brand-item flex items-center justify-between" data-item="states">
-                                <div class="left flex items-center cursor-pointer">
-                                    <div class="block-input">
-                                        <input type="checkbox" name="state" id="state-{{ state.id }}" value="{{ state.id }}" {% if state.id|stringformat:"i" in selected_states %}checked{% endif %} />
-                                        <i class='ph-fill ph-check-square icon-checkbox text-2xl'></i>
-                                    </div>
-                                    <label for="state-{{ state.id }}" class="brand-name capitalize pl-2 cursor-pointer">{{ state.name }}</label>
-                                </div>
-                                <div class='text-secondary2 number'>
-                                    {{ state.business_set.count }}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
+    <div class="container" style="@media (max-width: 768px) { padding: 0 15px; }">
+        <div class="flex max-md:flex-wrap max-md:flex-col gap-y-8" style="@media (max-width: 768px) { display: block; }">
+            <div class='sidebar lg:w-1/4 md:w-1/3 w-full md:pr-12' style="@media (max-width: 768px) { width: 100%; margin-bottom: 20px; }">
+                <button id="filter-toggle" style="display: none; width: 100%; padding: 10px; background-color: #f0f0f0; border: none; text-align: left; font-weight: bold; cursor: pointer; @media (max-width: 768px) { display: block; }">Filters ▼</button>
+                <div id="filter-content" style="@media (max-width: 768px) { display: none; padding: 15px; border: 1px solid #e0e0e0; border-top: none; }">
+                    <div class="choose-color">
+                        <a href="{% url "events" %}">
+                            <div class="heading6">Respond to events happening near you!</div>
+                        </a>
                     </div>
-                </form>
-                
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const filterForm = document.getElementById('filter-form');
-                        const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
-                        const businessList = document.getElementById('business-list');
-                    
-                        checkboxes.forEach(checkbox => {
-                            checkbox.addEventListener('change', function() {
-                                const formData = new FormData(filterForm);
-                                const queryString = new URLSearchParams(formData).toString();
-                    
-                                fetch(`/community/?${queryString}`, {
-                                    method: 'GET',
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    }
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    businessList.innerHTML = '';
-                                    if (data.businesses.length === 0) {
-                                        const noBusinessesMessage = document.createElement('p');
-                                        noBusinessesMessage.textContent = 'No businesses found.';
-                                        businessList.appendChild(noBusinessesMessage);
-                                    } else {
-                                        data.businesses.forEach(business => {
-                                            const businessItem = document.createElement('div');
-                                            businessItem.classList.add('product-item', 'list-type', 'mt-10');
-                                            businessItem.setAttribute('data-item', '2');
-                    
-                                            const productMain = document.createElement('div');
-                                            productMain.classList.add('product-main', 'cursor-pointer', 'flex', 'lg:items-center', 'sm:justify-between', 'gap-7', 'max-lg:gap-5');
-                    
-                                            const productThumb = document.createElement('div');
-                                            productThumb.classList.add('product-thumb', 'bg-white', 'relative', 'overflow-hidden', 'rounded-2xl', 'block', 'max-sm:w-1/2');
-                    
-                                            const productLink = document.createElement('a');
-                                            productLink.href = `/business/${business.business_slug}/`;
-                    
-                                            const productImg = document.createElement('div');
-                                            productImg.classList.add('product-img', 'w-full', 'aspect-[3/4]', 'rounded-2xl', 'overflow-hidden');
-                    
-                                            const img = document.createElement('img');
-                                            img.classList.add('w-20', 'h-20', 'rounded-full', 'object-cover', 'mr-4');
-                                            img.src = business.profile_picture;
-                    
-                                            productImg.appendChild(img);
-                                            productLink.appendChild(productImg);
-                                            productThumb.appendChild(productLink);
-                    
-                                            const productInfo = document.createElement('div');
-                                            productInfo.classList.add('flex', 'sm:items-center', 'gap-7', 'max-lg:gap-4', 'max-lg:flex-wrap', 'lg:w-2/3', 'lg:flex-shrink-0', 'max-lg:w-full', 'max-sm:flex-col', 'max-sm:w-1/2');
-                    
-                                            const productInfor = document.createElement('div');
-                                            productInfor.classList.add('product-infor', 'max-sm:w-full');
-                    
-                                            const productName = document.createElement('a');
-                                            productName.href = `/business/${business.business_slug}/`;
-                    
-                                            const productNameHeading = document.createElement('div');
-                                            productNameHeading.classList.add('product-name', 'heading6', 'inline-block', 'duration-300');
-                                            productNameHeading.textContent = business.business_name;
-                    
-                                            productName.appendChild(productNameHeading);
-                                            productInfor.appendChild(productName);
-                    
-                                            const productDesc = document.createElement('div');
-                                            productDesc.classList.add('text-secondary', 'desc', 'mt-5', 'max-sm:hidden');
-                    
-                                            const truncatedDescription = business.description.split(' ').slice(0, 25).join(' ');
-                                            productDesc.textContent = `${truncatedDescription}...`;
-                    
-                                            productInfor.appendChild(productDesc);
-                    
-                                            const productSeeMoreLink = document.createElement('a');
-                                            productSeeMoreLink.href = `/business/${business.business_slug}/`;
-                    
-                                            const productSeeMore = document.createElement('div');
-                                            productSeeMore.classList.add('text-button', 'underline', 'mt-4');
-                                            productSeeMore.textContent = 'See More';
-                    
-                                            productSeeMoreLink.appendChild(productSeeMore);
-                                            productInfor.appendChild(productSeeMoreLink);
-                    
-                                            productInfo.appendChild(productInfor);
-                                            productMain.appendChild(productThumb);
-                                            productMain.appendChild(productInfo);
-                                            businessItem.appendChild(productMain);
-                                            businessList.appendChild(businessItem);
-                                        });
-                                    }
-                                })
-                                .catch(error => console.error('Error:', error));
-                            });
-                        });
-                    });
-                </script>
-
+                    <form id="filter-form" method="get" class="mb-4">
+                        <div class="filter-brand pb-8 mt-8" style="@media (max-width: 768px) { padding-bottom: 15px; }">
+                            <div class="heading6" style="margin-bottom: 10px;">Filters</div>
+                            <div class="heading6">Countries</div>
+                            <div class="list-brand mt-4" style="@media (max-width: 768px) { display: flex; flex-wrap: wrap; gap: 10px; }">
+                                {% for country in countries %}
+                                <div class="brand-item flex items-center justify-between" data-item="countries" style="@media (max-width: 768px) { width: calc(50% - 5px); }">
+                                    <div class="left flex items-center cursor-pointer">
+                                        <div class="block-input">
+                                            <input type="checkbox" name="country" id="country-{{ country.id }}" value="{{ country.id }}" {% if country.id|stringformat:"i" in selected_countries %}checked{% endif %} />
+                                            <i class='ph-fill ph-check-square icon-checkbox text-2xl'></i>
+                                        </div>
+                                        <label for="country-{{ country.id }}" class="brand-name capitalize pl-2 cursor-pointer">{{ country.name }}</label>
+                                    </div>
+                                    <div class='text-secondary2 number'>
+                                        {{ country.business_set.count }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="heading6 mt-8">States</div>
+                            <div class="list-brand mt-4" style="@media (max-width: 768px) { display: flex; flex-wrap: wrap; gap: 10px; }">
+                                {% for state in states %}
+                                <div class="brand-item flex items-center justify-between" data-item="states" style="@media (max-width: 768px) { width: calc(50% - 5px); }">
+                                    <div class="left flex items-center cursor-pointer">
+                                        <div class="block-input">
+                                            <input type="checkbox" name="state" id="state-{{ state.id }}" value="{{ state.id }}" {% if state.id|stringformat:"i" in selected_states %}checked{% endif %} />
+                                            <i class='ph-fill ph-check-square icon-checkbox text-2xl'></i>
+                                        </div>
+                                        <label for="state-{{ state.id }}" class="brand-name capitalize pl-2 cursor-pointer">{{ state.name }}</label>
+                                    </div>
+                                    <div class='text-secondary2 number'>
+                                        {{ state.business_set.count }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="list-product-block style-list lg:w-3/4 md:w-2/3 w-full md:pl-3">
-                <div id="business-list" class='list-product hide-product-sold flex flex-col gap-8 mt-7' data-item="4">
+            <div class="list-product-block style-list lg:w-3/4 md:w-2/3 w-full md:pl-3" style="@media (max-width: 768px) { width: 100%; padding-left: 0; }">
+                <div id="business-list" class='list-product hide-product-sold flex flex-col gap-8 mt-7' data-item="4" style="@media (max-width: 768px) { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }">
                     {% if businesses %}
                     {% for business in businesses %}
-                        <div data-item="2" class="product-item list-type mt-10">
-                            <div class="product-main cursor-pointer flex lg:items-center sm:justify-between gap-7 max-lg:gap-5">
-                                <div class="product-thumb bg-white relative overflow-hidden rounded-2xl block max-sm:w-1/2">
+                        <div data-item="2" class="product-item list-type mt-10" style="@media (max-width: 768px) { margin-top: 0; display: flex; flex-direction: column; background-color: #f9f9f9; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }">
+                            <div class="product-main cursor-pointer flex lg:items-center sm:justify-between gap-7 max-lg:gap-5" style="@media (max-width: 768px) { flex-direction: column; gap: 10px; }">
+                                <div class="product-thumb bg-white relative overflow-hidden rounded-2xl block max-sm:w-1/2" style="@media (max-width: 768px) { width: 100%; height: 120px; }">
                                     <a href="{% url "business_detail" business.business_slug %}">
-                                        <div class="product-img w-full aspect-[3/4] rounded-2xl overflow-hidden">
+                                        <div class="product-img w-full aspect-[3/4] rounded-2xl overflow-hidden" style="@media (max-width: 768px) { height: 100%; }">
                                             <img src='{{ business.profile_picture.url }}' alt='business_profile'
-                     class='w-20 h-20 rounded-full object-cover mr-4' />
+                                                 class='w-20 h-20 rounded-full object-cover mr-4' style="@media (max-width: 768px) { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }" />
                                         </div>
                                     </a>
-                                    <div class="list-action px-5 absolute w-full bottom-5 max-lg:hidden">
-                                        <div class="quick-shop-block absolute left-5 right-5 bg-white p-5 rounded-[20px]">
-                                                <div class="list-size flex items-center justify-center flex-wrap gap-2">
-                                                    
-                                                        <div key="0" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XS</div>
-                        
-                                                        <div key="1" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">S</div>
-                        
-                                                        <div key="2" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">M</div>
-                        
-                                                        <div key="3" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">L</div>
-                        
-                                                        <div key="4" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">XL</div>
-                        
-                                                        <div key="5" class="size-item w-10 h-10 rounded-full flex items-center justify-center text-button bg-white border border-line">2XL</div>
-                        
-                                                </div>
-                                                <div class="add-cart-btn button-main w-full text-center rounded-full py-3 mt-4">Add To cart</div>
-                                        </div>
-                                    </div>
                                 </div>
-                                <div class="flex sm:items-center gap-7 max-lg:gap-4 max-lg:flex-wrap lg:w-2/3 lg:flex-shrink-0 max-lg:w-full max-sm:flex-col max-sm:w-1/2">
-                                        <div class="product-infor max-sm:w-full">
-                                            <a href="{% url "business_detail" business.business_slug %}"><div class="product-name heading6 inline-block duration-300">{{ business.business_name }}</div></a>
-                                            <div class="text-secondary desc mt-5 max-sm:hidden">{{ business.description|truncatewords:25 }}</div>
-                                            <a href="{% url "business_detail" business.business_slug %}"><div class="text-button underline mt-4">See More</div></a>
-                                        </div>
-                                        <div class="action w-fit flex flex-col items-center justify-center">
-                                            <a href="{% url "business_detail" business.business_slug %}">
-                                                <div class="quick-shop-btn button-main whitespace-nowrap py-2 px-9 max-lg:px-5 rounded-full bg-white text-black border border-black hover:bg-black hover:text-white">
-                                                    See Products
-                                                </div>
-                                            </a>
-                                            <div class="list-action-right flex items-center justify-center gap-3 mt-4">
+                                <div class="flex sm:items-center gap-7 max-lg:gap-4 max-lg:flex-wrap lg:w-2/3 lg:flex-shrink-0 max-lg:w-full max-sm:flex-col max-sm:w-1/2" style="@media (max-width: 768px) { width: 100%; }">
+                                    <div class="product-infor max-sm:w-full">
+                                        <a href="{% url "business_detail" business.business_slug %}"><div class="product-name heading6 inline-block duration-300" style="@media (max-width: 768px) { font-size: 1em; }">{{ business.business_name }}</div></a>
+                                        <div class="text-secondary desc mt-5 max-sm:hidden" style="@media (max-width: 768px) { font-size: 0.9em; margin-top: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }">{{ business.description|truncatewords:15 }}</div>
+                                    </div>
+                                    <div class="action w-fit flex flex-col items-center justify-center" style="@media (max-width: 768px) { width: 100%; }">
+                                        <a href="{% url "business_detail" business.business_slug %}" style="@media (max-width: 768px) { width: 100%; }">
+                                            <div class="quick-shop-btn button-main whitespace-nowrap py-2 px-9 max-lg:px-5 rounded-full bg-white text-black border border-black hover:bg-black hover:text-white" style="@media (max-width: 768px) { width: 100%; text-align: center; padding: 8px 0; font-size: 0.9em; }">
+                                                See Products
                                             </div>
-                                        </div>
+                                        </a>
                                     </div>
                                 </div>
-                            
+                            </div>
                         </div>
                     {% endfor %}
                 {% else %}
                 <p>No businesses found.</p>
                 {% endif %}
                 </div>
+                <div class="list-pagination w-full flex items-center justify-center gap-4 mt-10" style="text-align: center;">
+                    {% if businesses.has_other_pages %}
+                    <div class="pagination" style="display: inline-flex; gap: 10px; align-items: center;">
+                        <span class="step-links" style="display: flex; gap: 8px; align-items: center;">
+                            {% if businesses.has_previous %}
+                                <a href="?page=1" style="padding: 8px 12px; background-color: #000; color: #fff; border-radius: 5px; text-decoration: none; font-size: 14px; transition: opacity 0.3s;">&laquo; First</a>
+                                <a href="?page={{ businesses.previous_page_number }}" style="padding: 8px 12px; background-color: #000; color: #fff; border-radius: 5px; text-decoration: none; font-size: 14px; transition: opacity 0.3s;">Previous</a>
+                            {% endif %}
+                
+                            <span class="current" style="padding: 8px 12px; background-color: #f0f0f0; color: #000; border-radius: 5px; font-size: 14px;">
+                                Page {{ businesses.number }} of {{ businesses.paginator.num_pages }}
+                            </span>
+                
+                            {% if businesses.has_next %}
+                                <a href="?page={{ businesses.next_page_number }}" style="padding: 8px 12px; background-color: #000; color: #fff; border-radius: 5px; text-decoration: none; font-size: 14px; transition: opacity 0.3s;">Next</a>
+                                <a href="?page={{ businesses.paginator.num_pages }}" style="padding: 8px 12px; background-color: #000; color: #fff; border-radius: 5px; text-decoration: none; font-size: 14px; transition: opacity 0.3s;">Last &raquo;</a>
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
 
-                <div class="list-pagination w-full flex items-center gap-4 mt-10"></div>
+                <script>
+                    document.querySelectorAll('.step-links a').forEach(link => {
+                        link.addEventListener('mouseover', () => link.style.opacity = '0.8');
+                        link.addEventListener('mouseout', () => link.style.opacity = '1');
+                    });
+                </script>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterToggle = document.getElementById('filter-toggle');
+    const filterContent = document.getElementById('filter-content');
+
+    filterToggle.addEventListener('click', function() {
+        if (filterContent.style.display === 'none' || filterContent.style.display === '') {
+            filterContent.style.display = 'block';
+            filterToggle.innerHTML = 'Filters ▲';
+        } else {
+            filterContent.style.display = 'none';
+            filterToggle.innerHTML = 'Filters ▼';
+        }
+    });
+
+    function checkScreenSize() {
+        if (window.innerWidth <= 768) {
+            filterToggle.style.display = 'block';
+            filterContent.style.display = 'none';
+        } else {
+            filterToggle.style.display = 'none';
+            filterContent.style.display = 'block';
+        }
+    }
+
+    window.addEventListener('resize', checkScreenSize);
+    checkScreenSize();
+});
+</script>
 
 {% endblock content %}

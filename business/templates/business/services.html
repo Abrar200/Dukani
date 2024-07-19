@@ -11,7 +11,7 @@
                 <div class="text-content">
                     <div class="heading2 text-center">Services</div>
                     <div class="link flex items-center justify-center gap-1 caption1 mt-3">
-                        <a href='index-2.html'>Homepage</a>
+                        <a href="{% url 'home' %}">Homepage</a>
                         <i class='ph ph-caret-right text-sm text-secondary2'></i>
                         <div class='text-secondary2 capitalize'>Services</div>
                     </div>
@@ -94,43 +94,104 @@
             </div>
             <div class="list-product-block style-grid lg:w-3/4 md:w-2/3 w-full md:pl-3">
 
-                <div class="list-services grid gap-4 mt-7">
+                
+                <div class="list-services" style="display: grid; gap: 1rem; margin-top: 1.75rem; grid-template-columns: 1fr;">
                     {% for service in services %}
-                        <div class="service-item bg-white shadow-md rounded-lg overflow-hidden">
-                            <div class="service-main p-4">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <a href="{% url 'service_detail' service.business.business_slug service.service_slug %}" class="block">
-                                            <h3 class="text-xl font-semibold text-blue-600 hover:underline">{{ service.name }}</h3>
+                        <div class="service-item" style="background-color: white; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 0.5rem; overflow: hidden; transition: transform 0.3s; position: relative;">
+                            <div class="service-main" style="padding: 1rem;">
+                                <div style="display: flex; margin-bottom: 0.75rem;">
+                                    <a href="{% url 'service_detail' service.business.business_slug service.service_slug %}" style="margin-right: 1rem; flex-shrink: 0;">
+                                        <img src='{{ service.business.profile_picture.url }}' alt='business_profile'
+                                             style="width: 4rem; height: 4rem; border-radius: 50%; object-fit: cover; border: 2px solid #3B82F6;" />
+                                    </a>
+                                    <div style="flex-grow: 1;">
+                                        <a href="{% url 'service_detail' service.business.business_slug service.service_slug %}">
+                                            <h3 style="font-size: 1.125rem; font-weight: 600; color: #2563EB; margin-bottom: 0.25rem;">{{ service.name }}</h3>
                                         </a>
-                                        <p class="text-gray-600 mt-1">{{ service.business.business_name }}</p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-lg font-bold">${{ service.price }}</p>
+                                        <p style="font-size: 1.125rem; font-weight: 700; color: #059669;">${{ service.price }}</p>
+                                        <p style="font-size: 0.875rem; color: #4B5563;">{{ service.business.business_name }}</p>
                                     </div>
                                 </div>
-                                <div class="flex flex-wrap items-center text-sm text-gray-500 mt-2 gap-3">
-                                    <span>
-                                        <i class="ph-bold ph-map-pin mr-1"></i>
+                                <p style="font-size: 0.875rem; color: #4B5563; margin-bottom: 0.75rem;">{{ service.description|truncatechars:100 }}</p>
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; font-size: 0.75rem; color: #6B7280;">
+                                    <span style="background-color: #F3F4F6; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">
+                                        <i class="ph-bold ph-map-pin" style="margin-right: 0.25rem;"></i>
                                         {% for state in service.business.states.all %}
                                             {{ state.abbreviation }}{% if not forloop.last %}, {% endif %}
                                         {% endfor %}
                                     </span>
-                                    <span>
-                                        <i class="ph-bold ph-phone mr-1"></i>
+                                    <span style="background-color: #F3F4F6; padding: 0.25rem 0.5rem; border-radius: 0.25rem;">
+                                        <i class="ph-bold ph-phone" style="margin-right: 0.25rem;"></i>
                                         {{ service.business.phone }}
                                     </span>
                                     {% if service.business.website %}
-                                        <a href="{{ service.business.website }}" target="_blank" class="text-blue-500 hover:underline">
-                                            <i class="ph-bold ph-globe mr-1"></i>
+                                        <a href="{{ service.business.website }}" target="_blank" style="background-color: #DBEAFE; color: #2563EB; padding: 0.25rem 0.5rem; border-radius: 0.25rem; text-decoration: none;">
+                                            <i class="ph-bold ph-globe" style="margin-right: 0.25rem;"></i>
                                             Website
                                         </a>
                                     {% endif %}
                                 </div>
                             </div>
+                            <button onclick="showShareModal('{{ service.name }}', '{% url 'service_detail' service.business.business_slug service.service_slug %}')" style="position: absolute; top: 0.5rem; right: 0.5rem; background-color: #3B82F6; color: white; border: none; border-radius: 9999px; padding: 0.5rem; cursor: pointer;">
+                                <i class="ph-bold ph-share-network" style="font-size: 1.25rem;"></i>
+                            </button>
                         </div>
                     {% endfor %}
                 </div>
+
+                <style>
+                    @media (min-width: 640px) {
+                        .list-services {
+                            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                        }
+                    }
+                    @media (min-width: 1024px) {
+                        .list-services {
+                            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+                        }
+                    }
+                    @media (min-width: 1280px) {
+                        .list-services {
+                            grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+                        }
+                    }
+                </style>
+                
+                <!-- Share Modal -->
+                <div id="shareModal" style="display: none; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; z-index: 50;">
+                    <div style="background-color: white; border-radius: 0.5rem; padding: 1.5rem; max-width: 24rem; width: 100%;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Check out this service on Dukani!</h3>
+                        <div style="display: flex; align-items: center; background-color: #F3F4F6; border-radius: 0.25rem; padding: 0.5rem; margin-bottom: 1rem;">
+                            <input type="text" id="shareLink" style="flex-grow: 1; background-color: transparent; border: none; outline: none;" readonly>
+                            <button onclick="copyShareLink()" style="margin-left: 0.5rem; color: #3B82F6; background: none; border: none; cursor: pointer;">
+                                <i class="ph-bold ph-copy" style="font-size: 1.25rem;"></i>
+                            </button>
+                        </div>
+                        <button onclick="closeShareModal()" style="width: 100%; background-color: #3B82F6; color: white; padding: 0.5rem; border: none; border-radius: 0.25rem; cursor: pointer;">Close</button>
+                    </div>
+                </div>
+                
+                <script>
+                    function showShareModal(serviceName, serviceUrl) {
+                        const modal = document.getElementById('shareModal');
+                        const shareLink = document.getElementById('shareLink');
+                        const fullUrl = window.location.origin + serviceUrl;
+                        shareLink.value = fullUrl;
+                        modal.style.display = 'flex';
+                    }
+                
+                    function closeShareModal() {
+                        const modal = document.getElementById('shareModal');
+                        modal.style.display = 'none';
+                    }
+                
+                    function copyShareLink() {
+                        const shareLink = document.getElementById('shareLink');
+                        shareLink.select();
+                        document.execCommand('copy');
+                        alert('Link copied to clipboard!');
+                    }
+                </script>
                     
 
                 <div class="list-pagination w-full flex items-center justify-center gap-4 mt-10">

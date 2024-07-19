@@ -1,0 +1,137 @@
+{% extends "business/base.html" %}
+
+{% load static %}
+
+
+{% block slider %}
+
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Terms and Conditions</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href="{% url 'home' %}">Homepage</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Terms and Conditions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock slider %}
+
+{% block content %}
+
+<div class="terms-and-conditions login-block md:py-20 py-10">
+    <div class="container">
+        <div class="policy-header mb-8">
+            <h1 class="text-3xl font-bold mb-4">Terms and Conditions</h1>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">1. Introduction</h2>
+            <p>Welcome to Dukani Ethnic Store. These Terms and Conditions govern your use of our website and services, including user registration and business registration. By accessing our website or using our services, you agree to be bound by these Terms and Conditions.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">2. Definitions</h2>
+            <ul class="list-disc pl-6">
+                <li>"User" refers to any individual who registers an account on Dukani Ethnic Store.</li>
+                <li>"Business Owner" refers to any user who registers a business on Dukani Ethnic Store.</li>
+                <li>"Platform" refers to the Dukani Ethnic Store website and associated services.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">3. User Registration</h2>
+            <p class="mb-2">To use certain features of our Platform, you must register for an account. You agree to:</p>
+            <ul class="list-disc pl-6">
+                <li>Provide accurate, current, and complete information during the registration process.</li>
+                <li>Maintain and promptly update your registration information.</li>
+                <li>Keep your password confidential and notify us immediately of any unauthorized use of your account.</li>
+                <li>Be responsible for all activities that occur under your account.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">4. Business Registration</h2>
+            <p class="mb-2">To register a business on our Platform, you must:</p>
+            <ul class="list-disc pl-6">
+                <li>Have a valid user account.</li>
+                <li>Provide accurate and complete information about your business.</li>
+                <li>Have the legal authority to represent and bind the business to these Terms and Conditions.</li>
+                <li>Comply with all applicable laws and regulations in the operation of your business.</li>
+                <li>Maintain accurate and up-to-date business information on our Platform.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">5. Product and Service Listings</h2>
+            <p class="mb-2">Business Owners may list products and services on our Platform. By doing so, you agree to:</p>
+            <ul class="list-disc pl-6">
+                <li>Provide accurate, complete, and up-to-date information about your products and services.</li>
+                <li>Set fair and transparent pricing for your offerings.</li>
+                <li>Fulfill all orders and provide services as described in your listings.</li>
+                <li>Comply with our policies regarding prohibited items and services.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">6. Payment Processing</h2>
+            <p>We use Stripe Connect to process payments on our Platform. By using our services, you agree to comply with Stripe's Terms of Service and authorize us to share necessary information with Stripe for payment processing purposes.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">7. Fees and Commissions</h2>
+            <p>We may charge fees or commissions for the use of our Platform and services. These fees will be clearly communicated to you, and by continuing to use our services, you agree to pay all applicable fees.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">8. User Content</h2>
+            <p>You retain ownership of any content you submit to our Platform. However, you grant us a non-exclusive, worldwide, royalty-free license to use, display, and distribute your content in connection with our services.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">9. Prohibited Activities</h2>
+            <p class="mb-2">You agree not to engage in any of the following activities:</p>
+            <ul class="list-disc pl-6">
+                <li>Violating any applicable laws or regulations.</li>
+                <li>Infringing on the intellectual property rights of others.</li>
+                <li>Posting false, misleading, or fraudulent information.</li>
+                <li>Harassing, threatening, or intimidating other users.</li>
+                <li>Attempting to gain unauthorized access to our systems or other users' accounts.</li>
+            </ul>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">10. Termination</h2>
+            <p>We reserve the right to suspend or terminate your account at our discretion, without notice, for any violation of these Terms and Conditions or for any other reason we deem appropriate.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">11. Limitation of Liability</h2>
+            <p>To the fullest extent permitted by law, Dukani Ethnic Store shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses resulting from your use of our Platform and services.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">12. Changes to Terms and Conditions</h2>
+            <p>We reserve the right to modify these Terms and Conditions at any time. We will notify users of any significant changes. Your continued use of our Platform after such modifications constitutes your acceptance of the updated Terms and Conditions.</p>
+        </div>
+
+        <div class="policy-section mb-8">
+            <h2 class="text-2xl font-semibold mb-4">13. Contact Us</h2>
+            <p class="mb-2">If you have any questions about these Terms and Conditions, please contact us at:</p>
+            <p>
+                Dukani Ethnic Store<br>
+                Email: dukaniethnicstore@outlook.com
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

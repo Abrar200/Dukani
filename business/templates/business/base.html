@@ -22,7 +22,7 @@
 </head>
 
 <body>
-    <div id="top-nav" class='top-nav style-one bg-black md:h-[44px] h-[30px]'>
+    <div id="top-nav2" class='top-nav style-one bg-black md:h-[44px] h-[30px]'>
         <div class="container mx-auto h-full">
             <div class="top-nav-main flex justify-between max-md:justify-center h-full">
                 <div class="left-content flex items-center gap-5 max-md:hidden">
@@ -95,9 +95,23 @@
                         <i class="icon-category text-2xl"></i>
                     </div>
                     <div class="left flex items-center gap-16 w-full">
-                        <a href='{% url "home" %}' class='flex items-center max-lg:absolute max-lg:left-1/2 max-lg:-translate-x-1/2'>
+                        <a href='{% url "home" %}' id="desktopLogo" class='flex items-center max-lg:absolute max-lg:left-1/2 max-lg:-translate-x-1/2'>
                             <div class="heading4"><img style="height:130px" src='{% static "business/assets/images/banner/DukaniEthnicStore.png" %}'/></div>
                         </a>
+                        
+                        <script>
+                            function handleResize() {
+                                var logo = document.getElementById('desktopLogo');
+                                if (window.innerWidth <= 768) {
+                                    logo.style.display = 'none';
+                                } else {
+                                    logo.style.display = 'flex';
+                                }
+                            }
+                        
+                            window.addEventListener('resize', handleResize);
+                            handleResize(); // Call once to set initial state
+                        </script>
                         <div class="search-container w-full max-w-xl">
                             <div class="form-search relative w-full">
                                 <form action="{% url 'search' %}" method="get" class="inline w-full">
@@ -152,21 +166,22 @@
                                         <a href='#!' class='body1 hover:underline'>Support</a>
                                     </div>
                                 </div>                                
-                                <a href="{% url "user_messages" %}">
-                                    <div class="max-md:hidden cart-icon flex items-center relative cursor-pointer">
-                                        <i class="ph-bold ph-chats text-2xl"></i>
-                                        <span
-                                            class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">{{ unread_message_count }}</span>
-                                    </div>
+                                <div class="list-action flex items-center gap-4">
+                                    <a href="{% url "user_messages" %}">
+                                        <div class="max-md:hidden message-icon flex items-center relative cursor-pointer">
+                                            <i class="ph-bold ph-chats text-2xl"></i>
+                                            <span class="quantity message-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">{{ unread_message_count }}</span>
+                                        </div>
+                                    </a>
+                                    
                                     <div class="max-md:hidden wishlist-icon flex items-center relative cursor-pointer">
-                                        <span
-                                            class="quantity wishlist-quantity absolute -right-1.5 -top-1.5w-4 h-4 flex" style="color:#f7f5ef">0</span>
+                                        <span class="quantity absolute -right-1.5 -top-1.5w-4 h-4 flex" style="color:#f7f5ef"></span>
                                     </div>
-                                </a>                              
-                                <div class="max-md:hidden cart-icon flex items-center relative cursor-pointer">
-                                    <i class="ph-bold ph-handbag text-2xl"></i>
-                                    <span
-                                        class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">{{ cart_item_count }}</span>
+                                    
+                                    <div class="max-md:hidden cart-icon flex items-center relative cursor-pointer">
+                                        <i class="ph-bold ph-handbag text-2xl"></i>
+                                        <span class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">{{ cart_item_count }}</span>
+                                    </div>
                                 </div>
                             </div>
                         {% else %}
@@ -198,7 +213,7 @@
                     </div>
                 </div>
             </div>
-            <div id="top-nav" class='top-nav style-one md:h-[44px] h-[30px]' style="background-color: transparent;">
+            <div id="top-nav" class='top-nav style-one md:h-[44px] h-[30px]' style="background-color: transparent; transition: background-color 0.3s ease; margin-top: -10px;">
                 <div class="container mx-auto h-full">
                     <div class="top-nav-main flex justify-between max-md:justify-center h-full">
                         <div class="text-center text-button-uppercase flex items-center">
@@ -206,35 +221,35 @@
                                 <li class='h-full relative'>
                                     <a href="{% url 'products' %}?category=CL"
                                         class='text-button-uppercase duration-300 h-full flex items-center justify-center gap-1'
-                                        style="color: #333;">
+                                        style="color: #333; transition: color 0.3s ease;">
                                         CLOTHING
                                     </a>
                                 </li>
                                 <li class='h-full'>
                                     <a href="{% url 'products' %}?category=BE"
                                         class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333;">
+                                        style="color: #333; transition: color 0.3s ease;">
                                         BEAUTY
                                     </a>
                                 </li>
                                 <li class='h-full'>
                                     <a href="{% url 'products' %}?category=GR" 
                                         class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333;">
+                                        style="color: #333; transition: color 0.3s ease;">
                                         GROCERY
                                     </a>
                                 </li>
                                 <li class='h-full'>
                                     <a href="{% url 'products' %}?category=HM" 
                                         class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333;">
+                                        style="color: #333; transition: color 0.3s ease;">
                                         HOME
                                     </a>
                                 </li>
                                 <li class='h-full'>
                                     <a href="{% url 'products' %}?category=EL" 
                                         class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333;">
+                                        style="color: #333; transition: color 0.3s ease;">
                                         ELECTRONICS
                                     </a>
                                 </li>
@@ -245,6 +260,27 @@
             </div>
         </div>
 
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var topNav = document.getElementById('top-nav');
+                var links = topNav.getElementsByTagName('a');
+        
+                window.addEventListener('scroll', function() {
+                    if (window.scrollY > 50) {
+                        topNav.style.backgroundColor = 'white';
+                        for (var i = 0; i < links.length; i++) {
+                            links[i].style.color = 'black';
+                        }
+                    } else {
+                        topNav.style.backgroundColor = 'transparent';
+                        for (var i = 0; i < links.length; i++) {
+                            links[i].style.color = '#333';
+                        }
+                    }
+                });
+            });
+        </script>
         <!-- Menu Mobile -->
         <div id="menu-mobile" class=''>
             <div class="menu-container bg-white h-full">
@@ -255,7 +291,6 @@
                                 class="close-menu-mobile-btn absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-surface flex items-center justify-center">
                                 <i class="ph ph-x text-sm"></i>
                             </div>
-                            <a href='{% url "home" %}' class='logo text-3xl font-semibold text-center'>DUKANI</a>
                         </div>
                         <form action="{% url 'search' %}" method="get" class="form-search relative mt-2">
                             <input type="text" name="q" placeholder='What are you looking for?'
@@ -363,29 +398,6 @@
                             </div>
                         {% endfor %}
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class='modal-wishlist-block'>
-            <div class='modal-wishlist-main py-6'>
-                <div class="heading px-6 pb-3 flex items-center justify-between relative">
-                    <div class="heading5">Wishlist</div>
-                    <div
-                        class="close-btn absolute right-6 top-0 w-6 h-6 rounded-full bg-surface flex items-center justify-center duration-300 cursor-pointer hover:bg-black hover:text-white">
-                        <i class="ph ph-x text-sm"></i>
-                    </div>
-                </div>
-                <div class="list-product px-6">
-                    
-                </div>
-                <div class="footer-modal p-6 border-t bg-white border-line absolute bottom-0 left-0 w-full text-center">
-                    <a href='wishlist.html' class='button-main w-full text-center uppercase'>
-                        View All Wish List</a>
-                    <div
-                        class="text-button-uppercase continue mt-4 text-center has-line-before cursor-pointer inline-block">
-                        Or
-                        continue shopping</div>
                 </div>
             </div>
         </div>
@@ -939,10 +951,10 @@
                             </div>
                             <div class="item flex flex-col basis-1/2 ">
                                 <div class="text-button-uppercase pb-3">Customer Services</div>
-                                <a class='caption1 has-line-before duration-300 w-fit pt-2' href='faqs.html'>Privacy
+                                <a class='caption1 has-line-before duration-300 w-fit pt-2' href='{% url "privacy" %}'>Privacy
                                     Policy</a>
                                 <a class='caption1 has-line-before duration-300 w-fit pt-2'
-                                    href='order-tracking.html'>Return &
+                                    href='{% url "return-policy" %}'>Return &
                                     Refund</a>
                             </div>
                         </div>

@@ -31,11 +31,13 @@ from decimal import Decimal
 from django.core.paginator import Paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Subquery, OuterRef
+from django.views.decorators.http import require_POST
 
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 logger = logging.getLogger(__name__)
+
 
 def home(request):
     countries = Country.objects.all()
@@ -47,8 +49,21 @@ def home(request):
     return render(request, 'business/index.html', context)
 
 
+
 def shop(request):
     return render(request, 'business/shop.html')
+
+def privacy_policy(request):
+    return render(request, 'business/privacy_policy.html')
+
+
+def return_and_refund_policy(request):
+    return render(request, 'business/return_and_refund_policy.html')
+
+
+def terms_and_conditions(request):
+    return render(request, 'business/terms_and_conditions.html')
+
 
 def community(request):
     businesses = Business.objects.all().select_related('seller')
@@ -69,6 +84,10 @@ def community(request):
     elif state_filter:
         businesses = businesses.filter(states__in=state_filter).distinct()
 
+    paginator = Paginator(businesses, 5)  # Show 10 businesses per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     if request.is_ajax():
         business_data = [
             {
@@ -79,12 +98,12 @@ def community(request):
                 'seller_name': business.seller.get_full_name(),
                 # Add more fields as needed
             }
-            for business in businesses
+            for business in page_obj
         ]
         return JsonResponse({'businesses': business_data})
 
     context = {
-        'businesses': businesses,
+        'businesses': page_obj,
         'countries': countries,
         'states': states,
         'selected_countries': country_filter,
@@ -93,89 +112,102 @@ def community(request):
     return render(request, 'business/community.html', context)
 
 
+
 class BusinessRegistrationView(LoginRequiredMixin, View):
     def get(self, request):
         countries = Country.objects.all()
+        states = State.objects.all()
         day_choices = OpeningHour.DAY_CHOICES
-        return render(request, 'users/business_registration.html', {'countries': countries, 'day_choices': day_choices})
+        return render(request, 'users/business_registration.html', {
+            'countries': countries,
+            'states': states,
+            'day_choices': day_choices
+        })
 
     def post(self, request):
-        business_name = request.POST.get('business_name')
-        description = request.POST.get('description')
-        business_type = request.POST.get('business_type')
-        country_ids = request.POST.getlist('countries')
-        address = request.POST.get('address')
-        phone = request.POST.get('phone')
-        website = request.POST.get('website')
-        email = request.POST.get('email')
-        profile_picture = request.FILES.get('profile_picture')
-        banner_image = request.FILES.get('banner_image')
-
-        user = request.user
-        user.is_seller = True
-        user.save()
-
-        business = Business.objects.create(
-            seller=user,
-            business_name=business_name,
-            description=description,
-            business_type=business_type,
-            address=address,
-            phone=phone,
-            website=website,
-            email=email,
-            profile_picture=profile_picture,
-            banner_image=banner_image,
-        )
-
-        for country_id in country_ids:
-            country = Country.objects.get(id=country_id)
-            business.countries.add(country)
-
-        business.save()
-
-        for day, day_display in OpeningHour.DAY_CHOICES:
-            is_closed = request.POST.get(f'opening_hours-{day}-is_closed', False)
-            opening_time = request.POST.get(f'opening_hours-{day}-opening_time')
-            closing_time = request.POST.get(f'opening_hours-{day}-closing_time')
-
-            if is_closed:
-                OpeningHour.objects.create(
-                    business=business,
-                    day=day,
-                    is_closed=True
-                )
-            elif opening_time and closing_time:
-                OpeningHour.objects.create(
-                    business=business,
-                    day=day,
-                    opening_time=opening_time,
-                    closing_time=closing_time
-                )
-
-        # Create Stripe account
         try:
-            account = stripe.Account.create(
-                type='express',
-                country='AU',  # You can set this dynamically based on the business's country
+            business_name = request.POST.get('business_name')
+            description = request.POST.get('description')
+            business_type = request.POST.get('business_type')
+            country_ids = request.POST.getlist('countries[]')
+            state_ids = request.POST.getlist('states[]')
+            address = request.POST.get('address')
+            phone = request.POST.get('phone')
+            website = request.POST.get('website')
+            email = request.POST.get('email')
+            profile_picture = request.FILES.get('profile_picture')
+            banner_image = request.FILES.get('banner_image')
+
+            user = request.user
+            user.is_seller = True
+            user.save()
+
+            business = Business.objects.create(
+                seller=user,
+                business_name=business_name,
+                description=description,
+                business_type=business_type,
+                address=address,
+                phone=phone,
+                website=website,
                 email=email,
-                business_type='individual',
+                profile_picture=profile_picture,
+                banner_image=banner_image,
             )
-            business.stripe_account_id = account.id
+
+            business.countries.set(country_ids)
+            business.states.set(state_ids)
             business.save()
 
-            account_link = stripe.AccountLink.create(
-                account=account.id,
-                refresh_url=request.build_absolute_uri(reverse('business_registration')),
-                return_url=request.build_absolute_uri(reverse('business_detail', args=[business.business_slug])),
-                type='account_onboarding',
-            )
+            for day, day_display in OpeningHour.DAY_CHOICES:
+                is_closed = request.POST.get(f'opening_hours-{day}-is_closed', False)
+                opening_time = request.POST.get(f'opening_hours-{day}-opening_time')
+                closing_time = request.POST.get(f'opening_hours-{day}-closing_time')
 
-            return redirect(account_link.url)
-        except stripe.error.StripeError as e:
-            # Handle Stripe errors
-            messages.error(request, f"Stripe error: {e.user_message}")
-            business.delete()  # Clean up the partially created business
+                if is_closed:
+                    OpeningHour.objects.create(
+                        business=business,
+                        day=day,
+                        is_closed=True
+                    )
+                elif opening_time and closing_time:
+                    OpeningHour.objects.create(
+                        business=business,
+                        day=day,
+                        opening_time=opening_time,
+                        closing_time=closing_time
+                    )
+
+            # Create Stripe account
+            try:
+                account = stripe.Account.create(
+                    type='express',
+                    country='AU',  # You can set this dynamically based on the business's country
+                    email=email,
+                    business_type='individual',
+                )
+                business.stripe_account_id = account.id
+                business.save()
+
+                account_link = stripe.AccountLink.create(
+                    account=account.id,
+                    refresh_url=request.build_absolute_uri(reverse('business_registration')),
+                    return_url=request.build_absolute_uri(reverse('business_detail', args=[business.business_slug])),
+                    type='account_onboarding',
+                )
+
+                return redirect(account_link.url)
+            except stripe.error.StripeError as e:
+                logger.error(f"Stripe error: {e.user_message}")
+                messages.error(request, f"Stripe error: {e.user_message}")
+                business.delete()  # Clean up the partially created business
+                return redirect('business_registration')
+
+        except Exception as e:
+            logger.error(f"Error during business registration: {str(e)}")
+            messages.error(request, f"An error occurred: {str(e)}")
+            if 'business' in locals():
+                business.delete()  # Clean up the partially created business
             return redirect('business_registration')
 
     
@@ -195,14 +227,14 @@ def edit_business(request, business_slug):
         business_name = request.POST.get('business_name')
         description = request.POST.get('description')
         business_type = request.POST.get('business_type')
-        country_id = request.POST.get('country')
+        country_ids = request.POST.getlist('countries')
+        state_ids = request.POST.getlist('states')
         address = request.POST.get('address')
         phone = request.POST.get('phone')
         website = request.POST.get('website')
         email = request.POST.get('email')
         profile_picture = request.FILES.get('profile_picture')
         banner_image = request.FILES.get('banner_image')
-        state_ids = request.POST.getlist('states')
 
         if business_name and description and business_type and address and phone:
             business.business_name = business_name
@@ -217,9 +249,8 @@ def edit_business(request, business_slug):
             if banner_image:
                 business.banner_image = banner_image
 
-            if country_id != 'default':
-                country = Country.objects.get(id=country_id)
-                business.countries.set([country])
+            countries = Country.objects.filter(id__in=country_ids)
+            business.countries.set(countries)
 
             states = State.objects.filter(id__in=state_ids)
             business.states.set(states)
@@ -538,18 +569,19 @@ class ProductCreateView(LoginRequiredMixin, View):
             })
 
 
+
+
 class ProductEditView(LoginRequiredMixin, View):
     def get(self, request, business_slug, product_slug):
         business = get_object_or_404(Business, business_slug=business_slug, seller=request.user)
         product = get_object_or_404(Product, product_slug=product_slug, business=business)
         variations = product.variations.all()
         variation_names = variations.values_list('name', flat=True)
-        
+
         variations_with_values = {}
         for variation in variations:
-            # Fetch ProductVariation objects related to the current product and variation
             variation_values = ProductVariation.objects.filter(variation=variation, variation__product=product)
-            variations_with_values[variation.name] = variation_values
+            variations_with_values[variation.name] = list(variation_values.values('id', 'value', 'image'))
 
         return render(request, 'business/product_edit.html', {
             'product': product,
@@ -600,30 +632,47 @@ class ProductEditView(LoginRequiredMixin, View):
                             product=product,
                             name=variation_name
                         )
-                    
+
                     variation_values = request.POST.getlist(f'variation_values_{variation_name}')
                     variation_images = request.FILES.getlist(f'variation_images_{variation_name}')
+                    variation_value_ids = request.POST.getlist(f'variation_value_ids_{variation_name}')
 
-                    existing_values = {pv.value: pv for pv in variation.values.all()}
-                    
+                    existing_values = {str(pv.id): pv for pv in variation.values.all()}
+
                     for i, value in enumerate(variation_values):
+                        if value.strip() == "":
+                            continue  # Skip empty values
+
                         variation_image = variation_images[i] if i < len(variation_images) else None
-                        if value in existing_values:
-                            product_variation = existing_values[value]
+                        variation_value_id = variation_value_ids[i] if i < len(variation_value_ids) else None
+
+                        if variation_value_id and variation_value_id in existing_values:
+                            # Update existing ProductVariation
+                            product_variation = existing_values[variation_value_id]
+                            product_variation.value = value
                             if variation_image:
                                 product_variation.image = variation_image
                             product_variation.save()
                         else:
-                            ProductVariation.objects.create(
-                                variation=variation,
-                                value=value,
-                                image=variation_image
-                            )
+                            # Create new ProductVariation, but first check if one with this value already exists
+                            existing_pv = ProductVariation.objects.filter(variation=variation, value=value).first()
+                            if existing_pv:
+                                if variation_image:
+                                    existing_pv.image = variation_image
+                                existing_pv.save()
+                            else:
+                                ProductVariation.objects.create(
+                                    variation=variation,
+                                    value=value,
+                                    image=variation_image
+                                )
 
-                    for existing_value in existing_values.keys():
-                        if existing_value not in variation_values:
-                            existing_values[existing_value].delete()
+                    # Delete ProductVariations that are no longer in the form
+                    for existing_value_id in existing_values.keys():
+                        if existing_value_id not in variation_value_ids:
+                            existing_values[existing_value_id].delete()
 
+                # Delete Variations that are no longer in the form
                 for existing_variation_name in existing_variations.keys():
                     if existing_variation_name not in variation_names:
                         existing_variations[existing_variation_name].delete()
@@ -634,6 +683,18 @@ class ProductEditView(LoginRequiredMixin, View):
         else:
             return redirect('product_detail', business_slug=business.business_slug, product_slug=product.product_slug)
 
+    @login_required
+    @require_POST
+    def delete_variation(request, variation_id):
+        try:
+            variation = ProductVariation.objects.get(id=variation_id)
+            if variation.variation.product.business.seller == request.user:
+                variation.delete()
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'error': 'Not authorized'}, status=403)
+        except ProductVariation.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Variation not found'}, status=404)
 
 
 class ServiceCreateView(LoginRequiredMixin, View):
@@ -663,12 +724,18 @@ class ServiceCreateView(LoginRequiredMixin, View):
             return render(request, 'business/service_create.html', {'business': business, 'error': 'You are not authorized to add services to this business.'})
 
 
+
 def service_detail(request, business_slug, service_slug):
     service = get_object_or_404(Service, service_slug=service_slug, business__business_slug=business_slug)
+    business = service.business  # Get the business from the service
+    opening_hours = business.opening_hours.all()  # Get the opening hours for the specific business
     context = {
         'service': service,
+        'business': business,  # Pass the business to the template if needed
+        'opening_hours': opening_hours,
     }
     return render(request, 'business/service_detail.html', context)
+
     
 
 class ServiceEditView(LoginRequiredMixin, View):
@@ -704,6 +771,7 @@ class ServiceEditView(LoginRequiredMixin, View):
         else:
             return redirect('service_detail', business_slug=business.business_slug, service_slug=service.service_slug)
     
+
 
 
 class CartView(LoginRequiredMixin, View):
@@ -1434,13 +1502,23 @@ def event_detail(request, event_id):
 
 
 
+
 def products(request):
     products = Product.objects.all()
-    
+
     # Category filter
     category = request.GET.get('category')
     if category:
         products = products.filter(category=category)
+    
+    # Country and State filters
+    selected_countries = request.GET.getlist('country')
+    selected_states = request.GET.getlist('state')
+    
+    if selected_countries:
+        products = products.filter(business__countries__id__in=selected_countries).distinct()
+    if selected_states:
+        products = products.filter(business__states__id__in=selected_states).distinct()
     
     # Sorting
     sort = request.GET.get('sort')
@@ -1471,9 +1549,21 @@ def products(request):
     # Get all categories for the filter
     categories = Product.Category.choices
     
+    # Get countries and states with their product counts
+    countries = Country.objects.annotate(
+        product_count=Count('business__products', distinct=True)
+    )
+    states = State.objects.annotate(
+        product_count=Count('business__products', distinct=True)
+    )
+    
     context = {
         "products": products,
         "categories": categories,
+        "countries": countries,
+        "states": states,
+        "selected_countries": selected_countries,
+        "selected_states": selected_states,
     }
     
     return render(request, "business/products.html", context)

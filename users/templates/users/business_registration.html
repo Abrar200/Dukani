@@ -61,14 +61,23 @@
                         <i class="ph-bold ph-caret-down arrow-down text-xl"></i>
                     </div>
                     <div class="col-span-full select-block mt-5">
-                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="region"
-                            name="country">
-                            <option value="default">Choose Country/Region *</option>
+                        <label for="countries">Choose Country/Region(s) *</label>
+                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="countries"
+                                name="countries[]" multiple>
                             {% for country in countries %}
                             <option value="{{ country.id }}">{{ country.name }}</option>
                             {% endfor %}
                         </select>
-                        <i class="ph-bold ph-caret-down arrow-down text-xl"></i>
+                    </div>
+                    
+                    <div class="col-span-full select-block mt-5">
+                        <label for="states">Choose State(s) *</label>
+                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="states"
+                                name="states[]" multiple>
+                            {% for state in states %}
+                            <option value="{{ state.id }}">{{ state.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="email mt-5">
                         <input name="address" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Address *" required />
