@@ -62,10 +62,6 @@ def unread_message_count(request):
     return {
         'unread_message_count': unread_count,
     }
-    
-
-
-
 
 def business_order_count(request):
     order_count = 0

@@ -36,12 +36,10 @@
     <div class="container" style="@media (max-width: 768px) { padding: 0 15px; }">
         <div class="flex max-md:flex-wrap max-md:flex-col gap-y-8" style="@media (max-width: 768px) { display: block; }">
             <div class='sidebar lg:w-1/4 md:w-1/3 w-full md:pr-12' style="@media (max-width: 768px) { width: 100%; margin-bottom: 20px; }">
-                <button id="filter-toggle" style="display: none; width: 100%; padding: 10px; background-color: #f0f0f0; border: none; text-align: left; font-weight: bold; cursor: pointer; @media (max-width: 768px) { display: block; }">Filters ▼</button>
+                <button id="filter-toggle" style="display: none; width: 100%; padding: 10px; background-color: #f0f0f0; border: none; text-align: left; font-weight: bold; cursor: pointer; @media (max-width: 768px) { display: block; }">Filter by Country ▼</button>
                 <div id="filter-content" style="@media (max-width: 768px) { display: none; padding: 15px; border: 1px solid #e0e0e0; border-top: none; }">
                     <div class="choose-color">
-                        <a href="{% url "events" %}">
-                            <div class="heading6">Respond to events happening near you!</div>
-                        </a>
+                        <div class="heading6">Filter by Country, State or Category</div>
                     </div>
                     <form id="filter-form" method="get" class="mb-4">
                         <div class="filter-brand pb-8 mt-8" style="@media (max-width: 768px) { padding-bottom: 15px; }">
@@ -159,10 +157,10 @@ document.addEventListener('DOMContentLoaded', function() {
     filterToggle.addEventListener('click', function() {
         if (filterContent.style.display === 'none' || filterContent.style.display === '') {
             filterContent.style.display = 'block';
-            filterToggle.innerHTML = 'Filters ▲';
+            filterToggle.innerHTML = 'Filter by Country ▲';
         } else {
             filterContent.style.display = 'none';
-            filterToggle.innerHTML = 'Filters ▼';
+            filterToggle.innerHTML = 'Filter by Country ▼';
         }
     });
 

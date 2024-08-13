@@ -1,9 +1,7 @@
 {% extends "business/base.html" %}
-
 {% load static %}
 
 {% block slider %}
-
 <div class="breadcrumb-block style-shared">
     <div class="breadcrumb-main bg-linear overflow-hidden">
         <div class="container lg:pt-[134px] pt-24 pb-10 relative">
@@ -20,7 +18,6 @@
         </div>
     </div>
 </div>
-
 {% endblock slider %}
 
 {% if messages %}
@@ -35,45 +32,73 @@
 
 {% block content %}
 
-<div class="login-block md:py-20 py-10">
+<div class="register-block md:py-20 py-10">
     <div class="container">
         <div class="content-main flex gap-y-8 max-md:flex-col">
             <div class="left md:w-1/2 w-full lg:pr-[60px] md:pr-[40px] md:border-r border-line">
                 <div class="heading4">Register Your Business</div>
+
+                <!-- Warning Message -->
+                <div class="alert alert-warning mt-5">
+                    <strong>Warning:</strong> Your details will not be saved, unless you complete the FULL registration process, including finalizing your Stripe account. You may need your ID. Do not exit the page without completing your registration, otherwise, your details will not be saved.
+                </div>
+
                 <form class="md:mt-7 mt-4" action="{% url 'business_registration' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <div class="email">
+
+                    <!-- User Registration Fields -->
+                    <div class="heading6 mt-4">User Information</div>
+
+                    <div class="email mt-5">
+                        <input name="first_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="First Name *" required />
+                    </div>
+                    <div class="email mt-5">
+                        <input name="last_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Last Name *" required />
+                    </div>
+                    <div class="email mt-5">
+                        <input name="username" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Username *" required />
+                    </div>
+                    <div class="email mt-5">
+                        <input name="email" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="email" placeholder="Email Address *" required />
+                    </div>
+                    <div class="pass mt-5">
+                        <input name="password" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="password" type="password" placeholder="Password *" required />
+                        <small class="text-secondary mt-2 block">Password must be at least 12 characters long, with an uppercase letter, a lowercase letter, a number, and a special character.</small>
+                    </div>
+                    <div class="confirm-pass mt-5">
+                        <input name="confirm_password" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="confirm_password" type="password" placeholder="Confirm Password *" required />
+                    </div>
+
+                    <!-- Business Registration Fields -->
+                    <div class="heading6 mt-8">Business Information</div>
+
+                    <div class="email mt-5">
                         <input name="business_name" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Business Name *" required />
                     </div>
                     <div class="email mt-5">
-                        <input name="email" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="email" placeholder="Business Email *" required />
+                        <input name="business_email" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="email" placeholder="Business Email *" required />
                     </div>
                     <div class="email mt-5">
                         <textarea name="description" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" placeholder="Description *" required></textarea>
                     </div>
                     <div class="col-span-full select-block mt-5">
-                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="region"
-                        name="business_type">
-                            <option value="default">Choose Business Type *</option>
+                        <select class="border border-line px-4 py-3 w-full rounded-lg" name="business_type" required>
+                            <option value="" disabled selected>Choose Business Type *</option>
                             <option value="product">Product Business</option>
                             <option value="service">Service Business</option>
                         </select>
-                        <i class="ph-bold ph-caret-down arrow-down text-xl"></i>
                     </div>
                     <div class="col-span-full select-block mt-5">
                         <label for="countries">Choose Country/Region(s) *</label>
-                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="countries"
-                                name="countries[]" multiple>
+                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="countries" name="countries[]" multiple required>
                             {% for country in countries %}
                             <option value="{{ country.id }}">{{ country.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    
                     <div class="col-span-full select-block mt-5">
                         <label for="states">Choose State(s) *</label>
-                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="states"
-                                name="states[]" multiple>
+                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="states" name="states[]" multiple required>
                             {% for state in states %}
                             <option value="{{ state.id }}">{{ state.name }}</option>
                             {% endfor %}
@@ -86,44 +111,45 @@
                         <input name="phone" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="text" placeholder="Phone Number *" required />
                     </div>
                     <div class="email mt-5">
-                        <input name="website" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="url" placeholder="Website (Optional)" />
+                        <input name="website" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="url" placeholder="Website (optional)" />
                     </div>
                     <div class="email mt-5">
-                        <label>Profile Picture (Optional)</label>
-                        <input name="profile_picture" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="file" accept="image/*" placeholder="Profile Picture (Optional)" />
+                        <label>Profile Picture</label>
+                        <input name="profile_picture" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="file" accept="image/*" />
                     </div>
                     <div class="email mt-5">
-                        <label>Banner Image (Optional)</label>
-                        <input name="banner_image" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="file" accept="image/*" placeholder="Banner Image (Optional)" />
+                        <label>Banner Image</label>
+                        <input name="banner_image" class="border-line px-4 pt-3 pb-3 w-full rounded-lg" type="file" accept="image/*" />
                     </div>
+
+                    <!-- Opening Hours -->
                     <div class="opening-hours mt-5">
-                        <h3 class="text-lg font-semibold mb-3">Opening Hours</h3>
-                        <div class="grid grid-cols-2 gap-4">
+                        <h3 class="text-lg font-semibold mb-3">Opening Hours *</h3>
+                        <div class="grid grid-cols-1 gap-4">
                             {% for day in day_choices %}
-                            <div class="flex items-center">
-                                <input type="checkbox" name="opening_hours-{{ day.0 }}-is_closed" id="opening_hours-{{ day.0 }}-is_closed" class="mr-2">
-                                <label for="opening_hours-{{ day.0 }}-is_closed" class="mr-2">{{ day.1 }} (Closed)</label>
-                                <input type="time" name="opening_hours-{{ day.0 }}-opening_time" id="opening_hours-{{ day.0 }}-opening_time" class="border-line px-4 py-2 rounded-lg" placeholder="Opening Time"> - 
-                                <input type="time" name="opening_hours-{{ day.0 }}-closing_time" id="opening_hours-{{ day.0 }}-closing_time" class="border-line px-4 py-2 rounded-lg" placeholder="Closing Time">
+                            <div class="flex flex-col">
+                                <label class="mr-2">{{ day.1 }}</label>
+                                <div class="flex items-center">
+                                    <input type="time" name="opening_hours-{{ day.0 }}-opening_time" id="opening_hours-{{ day.0 }}-opening_time" class="border-line px-4 py-2 rounded-lg" placeholder="Opening Time"> 
+                                    <span class="mx-2">-</span>
+                                    <input type="time" name="opening_hours-{{ day.0 }}-closing_time" id="opening_hours-{{ day.0 }}-closing_time" class="border-line px-4 py-2 rounded-lg" placeholder="Closing Time">
+                                </div>
+                                <div class="flex items-center mt-2">
+                                    <input type="checkbox" name="opening_hours-{{ day.0 }}-is_closed" id="opening_hours-{{ day.0 }}-is_closed" class="mr-2">
+                                    <label for="opening_hours-{{ day.0 }}-is_closed" class="mr-2">(Closed)</label>
+                                </div>
                             </div>
                             {% endfor %}
                         </div>
                     </div>
-                    <div class="flex items-center justify-between mt-5">
-                        <div class='flex items-center'>
-                            <a href='#!' class='font-semibold hover:underline'>Terms and Conditions</a>
-                        </div>
-                    </div>
-                    <div class="mt-5">
-                        <h3 class="text-lg font-semibold mb-3">Stripe Connect</h3>
-                        <p>Please complete your Stripe Connect account setup to receive payments.</p>
-                    </div>
+
+
                     <div class="block-button md:mt-7 mt-4">
                         <button class="button-main">Register Business</button>
                     </div>
                 </form>
             </div>
-            
+
             <div class="right md:w-1/2 w-full lg:pl-[60px] md:pl-[40px] flex items-center">
                 <div class="text-content">
                     <div class="heading4">New Customer</div>

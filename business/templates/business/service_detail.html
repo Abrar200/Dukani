@@ -1,6 +1,6 @@
 {% extends "business/base.html" %}
-
 {% load static %}
+{% load custom_filters %}
 
 {% block slider %}
 
@@ -10,9 +10,13 @@
             <div class="left flex items-center gap-1 mt-10">
                 <a href='{% url "home" %}' class='caption1 text-secondary2 hover:underline'>Homepage</a>
                 <i class='ph ph-caret-right text-xs text-secondary2'></i>
-                <a href="{% url "business_detail" service.business.business_slug %}"><div class='caption1 text-secondary2'>{{ service.business.business_name }}</div></a>
+                <a href="{% url "business_detail" service.business.business_slug %}">
+                    <div class='caption1 text-secondary2'>{{ service.business.business_name }}</div>
+                </a>
                 <i class='ph ph-caret-right text-xs text-secondary2'></i>
-                <a href="{% url "business_detail" service.business.business_slug %}"><div class='caption1 text-secondary2'>Services</div></a>
+                <a href="{% url "business_detail" service.business.business_slug %}">
+                    <div class='caption1 text-secondary2'>Services</div>
+                </a>
                 <i class='ph ph-caret-right text-xs text-secondary2'></i>
                 <div class='caption1 capitalize'>{{ service.name }}</div>
             </div>
@@ -22,99 +26,213 @@
 
 {% endblock slider %}
 
-{% if messages %}
-<div class="container mt-3">
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}" role="alert">
-            {{ message }}
-        </div>
-    {% endfor %}
-</div>
-{% endif %}
-
 {% block content %}
 
-<div class="product-detail thumbnail-left default">
-    <div class="featured-product underwear filter-product-img md:py-20 py-14">
-        <div class="container flex justify-between gap-y-6 flex-wrap">
-            <div class="list-img md:w-1/2 md:pr-[45px] w-full flex-shrink-0">
-                <div class="sticky">
-                    <div class="swiper mySwiper2 rounded-2xl overflow-hidden swiper-initialized swiper-horizontal swiper-backface-hidden">
-                        <div class="swiper-wrapper" id="swiper-wrapper-c416ccee6e82d8c0" aria-live="polite">
-                            <!--  -->
-                        <div class="swiper-slide popup-link swiper-slide-active" role="group" aria-label="1 / 4" style="width: 382px;">
-                    <img src="{{ service.image.url }}" alt="img" class="w-full aspect-[3/4] object-cover">
-                </div>
-                
-            </div>
-                    <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span></div>
-                    <div class="swiper mySwiper swiper-initialized swiper-horizontal swiper-watch-progress swiper-backface-hidden swiper-thumbs">
-                        <div class="swiper-wrapper" id="swiper-wrapper-f9db48f549bf14de" aria-live="polite" style="transform: translate3d(0px, 0px, 0px);">
-                            <!--  -->
-                        </div>
-                    <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span></div>
-                </div>
-                <div class="swiper popup-img">
-                    <span class="close-popup-btn absolute top-4 right-4 z-[2]">
-                        <i class="ph ph-x text-3xl text-white"></i>
-                    </span>
-                    <div class="swiper-wrapper">
-                        <!--  -->
-                    </div>
-                    <div class="swiper-button-prev"></div>
-                    <div class="swiper-button-next"></div>
+    <div class="container">
+        <div class="item bg-surface overflow-hidden flex flex-col md:flex-row" style="margin-top: 20px;">
+            <a href="{% url "business_detail" service.business.business_slug %}">
+            <div class="md:w-1/5 p-6 flex flex-row mr-4">
+                <img src='{{ service.business.profile_picture.url }}' alt='business_profile'
+                        class='w-20 h-20 rounded-full object-cover mr-4' />
+                <div class="text-content">
+                    <div class="heading3 mt-5">{{ service.business.business_name }}</div>
                 </div>
             </div>
-            <div class="product-infor md:w-1/2 w-full lg:pl-[15px] md:pl-2">
-                <div class="flex justify-between">
-                    <div>
-                        <div class="product-category caption2 text-secondary font-semibold uppercase">fashion
-                        </div>
-                        <div class="product-name heading4 mt-1">{{ service.name }}</div>
-                    </div>
+            </a>
+            <div class="sm:w-3/4 flex flex-wrap">
+                <div class="w-1/2 sm:w-1/3 mb-2 sm:mb-0">
+                    <div class="text-sm font-semibold">Address:</div>
+                    <div class="text-xs text-gray-600">{{ service.business.address }}</div>
                 </div>
-                <div class="flex items-center gap-3 flex-wrap mt-5 pb-6 border-b border-line">
-                    <div class="product-price heading5">${{ service.price }}</div>
+                <div class="w-1/2 sm:w-1/3">
+                    <div class="text-sm font-semibold">Contact:</div>
+                    <div class="text-xs text-gray-600">{{ service.business.phone }}<br/>{{ service.business.email }}</div>
+                </div>
+            </div>
+        </div>
+        <!-- Service Details -->
+        <div class="service-details" style="display: flex; flex-direction: column; gap: 20px; margin-top: 20px;">
+            <!-- Service Description -->
+            <div class="service-info" style="border-bottom: 1px solid #ddd; padding-bottom: 20px;">
+                <h1 style="font-size: 24px; font-weight: bold;">{{ service.name }}</h1>
+                <p style="color: #777;">{{ service.description }}</p>
+                <p style="font-size: 18px; font-weight: bold;">Price: ${{ service.price }}</p>
+            </div>
 
-                    <div class='product-description text-secondary mt-3'>{{ service.description }}</div>
-                </div>
-                <div class="list-action mt-6">
-                    {% if request.user.is_authenticated and request.user == service.business.seller %}
-                        <a href="{% url 'service_edit' service.business.business_slug service.service_slug %}"><div
-                            class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">
-                            Edit Service
-                        </div></a>
+            <!-- Opening Hours -->
+            <div class="opening-hours" style="border-bottom: 1px solid #ddd; padding-bottom: 20px;">
+                <h2 style="font-size: 20px; font-weight: bold;">Opening Hours</h2>
+                <ul style="list-style: none; padding-left: 0;">
+                    {% for opening_hour in opening_hours %}
+                    <li style="margin-bottom: 5px;">
+                        <strong>{{ opening_hour.get_day_display }}</strong>:
+                        {% if opening_hour.is_closed %}
+                            Closed
                         {% else %}
-                        <a href="{% url 'message_seller' service.business.business_slug %}">
-                            <div class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">
-                                Message Seller
-                            </div>
-                        </a>
-                    {% endif %}
-                </div>
+                            {{ opening_hour.opening_time|time:"g:ia" }} - {{ opening_hour.closing_time|time:"g:ia" }}
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
 
-                <div class="w-1/4 mr-8" style="margin-top: 10px; margin-bottom: 10px;">
-                    <div class="list-featrue">
-                        <div class="item">
-                            <div class="heading6">Opening Hours:</div>
-                            {% for opening_hour in opening_hours %}
-                            <div class="flex items-center mt-2">
-                                <div class="text-secondary whitespace-nowrap">{{ opening_hour.get_day_display }}:</div>
-                                {% if opening_hour.is_closed %}
-                                <div class='text-title text-black whitespace-nowrap ml-2'>Closed</div>
-                                {% else %}
-                                {% with opening_time=opening_hour.opening_time|time:"g:sa" closing_time=opening_hour.closing_time|time:"g:sa" %}
-                                <div class='text-black whitespace-nowrap ml-2'><b>{{ opening_time }} - {{ closing_time }}</b></div>
-                                {% endwith %}
-                                {% endif %}
-                            </div>
-                            {% endfor %}
-                        </div>
+            <!-- Images and Videos -->
+            <div class="media-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+                {% if service.image %}
+                    <div class="media-item">
+                        <img src="{{ service.image.url }}" alt="img" style="width: 100%; height: 120px; object-fit: cover; cursor: pointer;" onclick="openMedia('{{ service.image.url }}', 'image')">
                     </div>
+                {% endif %}
+                {% for image in service.additional_images.all %}
+                    <div class="media-item">
+                        <img src="{{ image.image.url }}" alt="img" style="width: 100%; height: 120px; object-fit: cover; cursor: pointer;" onclick="openMedia('{{ image.image.url }}', 'image')">
+                    </div>
+                {% endfor %}
+                {% for video in service.videos.all %}
+                    <div class="media-item">
+                        <video style="width: 100%; height: 120px; object-fit: cover; cursor: pointer;" onclick="openMedia('{{ video.video.url }}', 'video')">
+                            <source src="{{ video.video.url }}" type="video/mp4">
+                        </video>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Edit Service or Message Seller -->
+            {% if request.user.is_authenticated and request.user == service.business.seller %}
+                <div class="mt-6">
+                    <a href="{% url 'service_edit' service.business.business_slug service.service_slug %}">
+                        <div class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">
+                            Edit Service
+                        </div>
+                    </a>
                 </div>
+            {% else %}
+                <div class="mt-6">
+                    <a href="{% url 'message_seller' service.business.business_slug %}">
+                        <div class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">
+                            Message Seller
+                        </div>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Modal for enlarged media -->
+        <div id="mediaModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); overflow: auto;">
+            <span style="position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer;" onclick="closeMedia()">&times;</span>
+            <div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%;">
+                <img id="enlargedImage" style="max-width: 90%; max-height: 90%; object-fit: contain; margin: auto;">
+                <video id="enlargedVideo" style="display: none; max-width: 90%; max-height: 90%; margin: auto;" controls>
+                    <source src="" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
             </div>
         </div>
     </div>
-</div>
 
+    <!-- Customer Reviews -->
+    <div class="review-block md:py-20 py-10 bg-surface mt-5">
+        <div class="container">
+            <div class="heading flex items-center justify-between flex-wrap gap-4">
+                <div class="heading4">Customer Review</div>
+                <a href='#form-review' class='button-main bg-white text-black border border-black'>Write a Review</a>
+            </div>
+
+            <div class="top-overview flex justify-between py-6 max-md:flex-col gap-y-6">
+                <div class="rating lg:w-1/4 md:w-[30%] lg:pr-[75px] md:pr-[35px]">
+                    <div class="heading flex items-center justify-center flex-wrap gap-3 gap-y-4">
+                        <div class="text-display">{{ service.overall_review }}</div>
+                        <div class='flex flex-col items-center'>
+                            <div class="rate flex">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= service.overall_review %}
+                                        <i class="ph-fill ph-star text-lg text-yellow"></i>
+                                    {% else %}
+                                        <i class="ph-fill ph-star text-lg text-gray"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>                            
+                            <div class='text-secondary text-center mt-1'>({{ service.reviews.count }} Ratings)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-review">
+                {% for review in reviews %}
+                <div class="item flex max-lg:flex-col gap-y-4 w-full py-6 border-t border-line">
+                    <div class="left lg:w-1/4 w-full lg:pr-[15px]">
+                        <div class="user mt-3">
+                            <div class="text-title">{{ review.user.username }}</div>
+                            <div class="flex items-center gap-2">
+                                <div class="text-secondary2">{{ review.date }} days ago</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right lg:w-3/4 w-full lg:pl-[15px]">
+                        <div class="rate flex">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= review.rating %}
+                                    <i class="ph-fill ph-star text-yellow"></i>
+                                {% else %}
+                                    <i class="ph-fill ph-star text-gray"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="body1 mt-3">{{ review.review_text }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div id="form-review" class='form-review pt-6'>
+                <div class="heading4">Leave A Comment</div>
+                <form class="grid sm:grid-cols-2 gap-4 gap-y-5 mt-6" method="post" action="{% url 'service_review' service.business.business_slug service.service_slug %}">
+                    {% csrf_token %}
+                    <div class="col-span-full message">
+                        <textarea class="border border-line px-4 py-3 w-full rounded-lg" id="message" name="message" rows="3" placeholder="Your message *" required></textarea>
+                    </div>
+                    <div class="col-span-full rating">
+                        <label for="rating">Rating:</label>
+                        <select class="border border-line px-4 py-3 w-full rounded-lg" id="rating" name="rating" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                    <div class="col-span-full sm:pt-3">
+                        <button type="submit" class='button-main bg-white text-black border border-black'>Submit Review</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    function openMedia(src, type) {
+        var modal = document.getElementById("mediaModal");
+        var img = document.getElementById("enlargedImage");
+        var video = document.getElementById("enlargedVideo");
+    
+        modal.style.display = "block";
+        if (type === 'image') {
+            img.src = src;
+            img.style.display = "block";
+            video.style.display = "none";
+        } else if (type === 'video') {
+            video.src = src;
+            video.style.display = "block";
+            img.style.display = "none";
+        }
+    }
+    
+    function closeMedia() {
+        var modal = document.getElementById("mediaModal");
+        modal.style.display = "none";
+        var video = document.getElementById("enlargedVideo");
+        video.pause();
+    }
+</script>
 {% endblock content %}

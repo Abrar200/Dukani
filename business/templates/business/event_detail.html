@@ -4,28 +4,13 @@
 
 {% block slider %}
 
-
-
 {% endblock slider %}
 
 {% block content %}
-
 <div class='blog blog-detail detail2 md:mt-[74px] mt-[56px] border-t border-line'>
-
     <div class="container lg:pt-20 md:pt-14 pt-10">
         <div class="blog-content flex justify-between max-lg:flex-col gap-y-10">
             <div class="main xl:w-3/4 lg:w-2/3 lg:pr-[15px]">
-
-                {% if messages %}
-                    <div class="container mt-3">
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}" role="alert">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
                 <div class="heading3 blog-title mt-3">{{ event.title }}</div>
                 
                 <div class="author flex items-center gap-4 mt-4">
@@ -35,29 +20,56 @@
                         <div class="blog-date caption1 text-secondary">{{ event.created_at|date:"g:i a, M j, Y" }}</div>
                     </div>
                 </div>
-
-                {% if is_organizer %}
-                <a href="{% url "edit_event" event.id %}"><button class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap mt-8">Edit this Event</button></a>
+            
+                {% if request.user.is_authenticated %}
+                    <button class="save-button bg-white rounded-full p-2 shadow-md" style="margin-top: 10px;" data-event-id="{{ event.id }}">
+                        {% if is_saved %}
+                            <i class="fa fa-heart" style="color: #f41b17;" aria-hidden="true"> Remove Event</i>
+                        {% else %}
+                            <i class="fa fa-heart-o" aria-hidden="true"> Save Event</i>
+                        {% endif %}
+                    </button>
                 {% endif %}
+
                 <div class="bg-img md:py-10 py-6">
-                    <img src='{{ event.banner_image.url }}' alt='img'
-                        class='blog-img w-full object-cover rounded-3xl' />
+                    <img src='{{ event.banner_image.url }}' alt='img' class='blog-img w-full object-cover rounded-3xl' />
                 </div>
                 <div class="content">
-
-
                     <div class="list-img grid sm:grid-cols-2 gap-[30px] mb-5">
                         Starting at - {{ event.start_time|date:"g:i a, M j, Y" }}
                     </div>
-
                     <div class="list-img grid sm:grid-cols-2 gap-[30px] mt-5 mb-5">
                         Location - {{ event.location }}
                     </div>
-
                     <div class="blog-description body1 mt-5">{{ event.description }}</div>
                 </div>
-                
             </div>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const saveButtons = document.querySelectorAll('.save-button');
+
+                    saveButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            const eventId = this.dataset.eventId;
+
+                            fetch(`/save_event/${eventId}/`, {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.status === 'saved' || data.status === 'removed') {
+                                    window.location.reload(); // Redirect to the current page
+                                }
+                            })
+                            .catch(error => console.error('Error:', error));
+                        });
+                    });
+                });
+            </script>
         </div>
     </div>
 
@@ -71,8 +83,7 @@
                         <div class="blog-item style-one h-full cursor-pointer" data-item="16">
                             <div class="blog-main h-full block">
                                 <div class="blog-thumb rounded-[20px] overflow-hidden">
-                                    <a href="{% url 'event_detail' event.id %}"><img style="height:275px" src='{{ event.banner_image.url }}' alt='blog-img'
-                                        class='w-full duration-500' /></a>
+                                    <a href="{% url 'event_detail' event.id %}"><img style="height:275px" src='{{ event.banner_image.url }}' alt='blog-img' class='w-full duration-500' /></a>
                                 </div>
                                 <div class="blog-infor mt-7">
                                     <a href="{% url 'event_detail' event.id %}"><div class="heading6 blog-title mt-3 duration-300">{{ event.title }}</div></a>
@@ -91,5 +102,4 @@
         </div>
     </div>
 </div>
-
 {% endblock content %}

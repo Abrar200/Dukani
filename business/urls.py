@@ -46,4 +46,8 @@ urlpatterns = [
     path('privacy-policy/', views.privacy_policy, name="privacy"),
     path('return-and-refund-policy/', views.return_and_refund_policy, name="return-policy"),
     path('terms-and-conditions/', views.terms_and_conditions, name="terms-and-conditions"),
+    path('save_event/<int:event_id>/', views.save_event, name='save_event'),
+    path('remove_saved_event/<int:event_id>/', views.remove_saved_event, name='remove_saved_event'),
+    path('saved_events/', views.saved_events, name='saved_events'),
+    path('business/<str:business_slug>/service/<str:service_slug>/review/', views.ServiceReviewView.as_view(), name='service_review'),
 ]

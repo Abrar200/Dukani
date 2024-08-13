@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Country, Product, Business, Service, OpeningHour, Cart, Message, State, Event, Variation, ProductVariation, VAR_CATEGORIES, CartItemVariation, ProductReview, Order, OrderItem, Refund
+from .models import Country, Product, Business, Service, OpeningHour, Cart, Message, State, Event, Variation, ProductVariation, VAR_CATEGORIES, CartItemVariation, ProductReview, Order, OrderItem, Refund, SavedEvent, ServiceImage, ServiceVideo, ServiceReview
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
@@ -32,7 +32,9 @@ from django.core.paginator import Paginator
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Subquery, OuterRef
 from django.views.decorators.http import require_POST
-
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator, MinLengthValidator
+from .forms import ServiceReviewForm
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -111,9 +113,21 @@ def community(request):
     }
     return render(request, 'business/community.html', context)
 
+import re
 
+def validate_password(password):
+    if len(password) < 12:
+        raise ValidationError("Password must be at least 12 characters long.")
+    if not re.search(r'[A-Z]', password):
+        raise ValidationError("Password must contain at least one uppercase letter.")
+    if not re.search(r'[a-z]', password):
+        raise ValidationError("Password must contain at least one lowercase letter.")
+    if not re.search(r'[0-9]', password):
+        raise ValidationError("Password must contain at least one number.")
+    if not re.search(r'[@$!%*#?&]', password):
+        raise ValidationError("Password must contain at least one special character (@$!%*#?&).")
 
-class BusinessRegistrationView(LoginRequiredMixin, View):
+class BusinessRegistrationView(View):
     def get(self, request):
         countries = Country.objects.all()
         states = State.objects.all()
@@ -124,59 +138,103 @@ class BusinessRegistrationView(LoginRequiredMixin, View):
             'day_choices': day_choices
         })
 
+
     def post(self, request):
         try:
-            business_name = request.POST.get('business_name')
-            description = request.POST.get('description')
-            business_type = request.POST.get('business_type')
-            country_ids = request.POST.getlist('countries[]')
-            state_ids = request.POST.getlist('states[]')
-            address = request.POST.get('address')
-            phone = request.POST.get('phone')
-            website = request.POST.get('website')
+            # User data
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            username = request.POST.get('username')
             email = request.POST.get('email')
-            profile_picture = request.FILES.get('profile_picture')
-            banner_image = request.FILES.get('banner_image')
+            password = request.POST.get('password')
+            confirm_password = request.POST.get('confirm_password')
 
-            user = request.user
-            user.is_seller = True
-            user.save()
+            if password != confirm_password:
+                raise ValidationError("Passwords do not match.")
 
-            business = Business.objects.create(
-                seller=user,
-                business_name=business_name,
-                description=description,
-                business_type=business_type,
-                address=address,
-                phone=phone,
-                website=website,
-                email=email,
-                profile_picture=profile_picture,
-                banner_image=banner_image,
+            # Validate password
+            try:
+                validate_password(password)
+            except ValidationError as e:
+                messages.error(request, e.message)
+                return redirect('business_registration')
+
+            # Validate username
+            username_validator = RegexValidator(
+                regex=r'^[a-zA-Z0-9_.]+$',
+                message="Username can only contain letters, numbers, underscores, and periods."
             )
 
-            business.countries.set(country_ids)
-            business.states.set(state_ids)
-            business.save()
+            try:
+                username_validator(username)
+            except ValidationError as e:
+                messages.error(request, e.message)
+                return redirect('business_registration')
 
-            for day, day_display in OpeningHour.DAY_CHOICES:
-                is_closed = request.POST.get(f'opening_hours-{day}-is_closed', False)
-                opening_time = request.POST.get(f'opening_hours-{day}-opening_time')
-                closing_time = request.POST.get(f'opening_hours-{day}-closing_time')
+            if CustomUser.objects.filter(username=username).exists():
+                messages.error(request, 'Username already exists.')
+            elif CustomUser.objects.filter(email=email).exists():
+                messages.error(request, 'Email already exists.')
+            else:
+                user = CustomUser.objects.create_user(username=username, first_name=first_name, last_name=last_name, email=email, password=password)
+                user.is_seller = True
+                user.save()
 
-                if is_closed:
-                    OpeningHour.objects.create(
-                        business=business,
-                        day=day,
-                        is_closed=True
-                    )
-                elif opening_time and closing_time:
-                    OpeningHour.objects.create(
-                        business=business,
-                        day=day,
-                        opening_time=opening_time,
-                        closing_time=closing_time
-                    )
+                # Business data
+                business_name = request.POST.get('business_name')
+                description = request.POST.get('description')
+                business_type = request.POST.get('business_type')
+                country_ids = request.POST.getlist('countries[]')
+                state_ids = request.POST.getlist('states[]')
+                address = request.POST.get('address')
+                phone = request.POST.get('phone')
+                website = request.POST.get('website')
+                email = request.POST.get('email')
+                profile_picture = request.FILES.get('profile_picture')
+                banner_image = request.FILES.get('banner_image')
+
+                # Create the business
+                business = Business.objects.create(
+                    seller=user,
+                    business_name=business_name,
+                    description=description,
+                    business_type=business_type,
+                    address=address,
+                    phone=phone,
+                    website=website,
+                    email=email,
+                    profile_picture=profile_picture,
+                    banner_image=banner_image,
+                )
+
+                business.countries.set(country_ids)
+                business.states.set(state_ids)
+                business.save()
+
+                # Validate and create opening hours
+                for day, day_display in OpeningHour.DAY_CHOICES:
+                    is_closed = request.POST.get(f'opening_hours-{day}-is_closed', False)
+                    opening_time = request.POST.get(f'opening_hours-{day}-opening_time')
+                    closing_time = request.POST.get(f'opening_hours-{day}-closing_time')
+
+                    if is_closed:
+                        OpeningHour.objects.create(
+                            business=business,
+                            day=day,
+                            is_closed=True
+                        )
+                    elif opening_time and closing_time:
+                        OpeningHour.objects.create(
+                            business=business,
+                            day=day,
+                            opening_time=opening_time,
+                            closing_time=closing_time,
+                            is_closed=False
+                        )
+                    else:
+                        messages.error(request, f"Please specify both opening and closing times or mark the day as closed for {day_display}.")
+                        business.delete()
+                        return redirect('business_registration')
 
             # Create Stripe account
             try:
@@ -198,18 +256,15 @@ class BusinessRegistrationView(LoginRequiredMixin, View):
 
                 return redirect(account_link.url)
             except stripe.error.StripeError as e:
-                logger.error(f"Stripe error: {e.user_message}")
-                messages.error(request, f"Stripe error: {e.user_message}")
                 business.delete()  # Clean up the partially created business
-                return redirect('business_registration')
+                raise ValidationError(f"Stripe error: {e.user_message}")
 
-        except Exception as e:
-            logger.error(f"Error during business registration: {str(e)}")
-            messages.error(request, f"An error occurred: {str(e)}")
-            if 'business' in locals():
-                business.delete()  # Clean up the partially created business
+        except ValidationError as e:
+            messages.error(request, e.message)
             return redirect('business_registration')
-
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            return redirect('business_registration')
     
 
 @login_required
@@ -696,6 +751,51 @@ class ProductEditView(LoginRequiredMixin, View):
         except ProductVariation.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Variation not found'}, status=404)
 
+def services(request):
+    services = Service.objects.all()
+
+    countries = Country.objects.annotate(service_count=Count('business__services', distinct=True))
+    states = State.objects.annotate(service_count=Count('business__services', distinct=True))
+
+    selected_countries = request.GET.getlist('country')
+    selected_states = request.GET.getlist('state')
+
+    if selected_countries:
+        services = services.filter(business__countries__id__in=selected_countries)
+    if selected_states:
+        services = services.filter(business__states__id__in=selected_states)
+
+    paginator = Paginator(services, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "services": page_obj,
+        "countries": countries,
+        "states": states,
+        "selected_countries": selected_countries,
+        "selected_states": selected_states,
+    }
+    return render(request, "business/services.html", context)
+
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from django.db.models import Avg
+
+def service_detail(request, business_slug, service_slug):
+    service = get_object_or_404(Service, service_slug=service_slug, business__business_slug=business_slug)
+    reviews = service.reviews.all()
+    overall_review = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+    opening_hours = service.business.opening_hours.all()
+
+    context = {
+        'service': service,
+        'reviews': reviews,
+        'overall_review': overall_review,
+        'opening_hours': opening_hours,
+    }
+    return render(request, 'business/service_detail.html', context)
+
 
 class ServiceCreateView(LoginRequiredMixin, View):
     def get(self, request, business_slug):
@@ -718,32 +818,43 @@ class ServiceCreateView(LoginRequiredMixin, View):
                 business=business
             )
 
+            for img in request.FILES.getlist('additional_images[]'):
+                ServiceImage.objects.create(service=service, image=img)
+
+            for vid in request.FILES.getlist('additional_videos[]'):
+                ServiceVideo.objects.create(service=service, video=vid)
+
+            messages.success(request, 'Service created successfully.')
             return redirect('service_detail', business_slug=business.business_slug, service_slug=service.service_slug)
         else:
-            # Handle the case where the user is not the owner of the business
-            return render(request, 'business/service_create.html', {'business': business, 'error': 'You are not authorized to add services to this business.'})
+            messages.error(request, 'You do not have permission to create a service for this business.')
+            return redirect('business_detail', business_slug=business_slug)
 
+class ServiceReviewView(LoginRequiredMixin, View):
+    def post(self, request, business_slug, service_slug):
+        service = get_object_or_404(Service, service_slug=service_slug, business__business_slug=business_slug)
+        review_text = request.POST.get('message')
+        rating = request.POST.get('rating')
+        user = request.user
 
+        if review_text and rating:
+            ServiceReview.objects.create(
+                service=service,
+                user=user,
+                review_text=review_text,
+                rating=int(rating)
+            )
+            messages.success(request, 'Your review has been submitted successfully.')
+        else:
+            messages.error(request, 'Please provide both a review text and a rating.')
 
-def service_detail(request, business_slug, service_slug):
-    service = get_object_or_404(Service, service_slug=service_slug, business__business_slug=business_slug)
-    business = service.business  # Get the business from the service
-    opening_hours = business.opening_hours.all()  # Get the opening hours for the specific business
-    context = {
-        'service': service,
-        'business': business,  # Pass the business to the template if needed
-        'opening_hours': opening_hours,
-    }
-    return render(request, 'business/service_detail.html', context)
-
-    
+        return redirect('service_detail', business_slug=service.business.business_slug, service_slug=service.service_slug)
 
 class ServiceEditView(LoginRequiredMixin, View):
     def get(self, request, business_slug, service_slug):
         service = get_object_or_404(Service, service_slug=service_slug, business__business_slug=business_slug)
         business = service.business
 
-        # Check if the user is the seller of the business
         if request.user != business.seller:
             return redirect('service_detail', business_slug=business.business_slug, service_slug=service.service_slug)
 
@@ -753,26 +864,42 @@ class ServiceEditView(LoginRequiredMixin, View):
         service = get_object_or_404(Service, service_slug=service_slug, business__business_slug=business_slug)
         business = service.business
 
-        # Check if the user is the seller of the business
         if request.user == business.seller:
-            name = request.POST.get('name')
-            description = request.POST.get('description')
-            price = request.POST.get('price')
-            image = request.FILES.get('image')
+            service.name = request.POST.get('name')
+            service.description = request.POST.get('description')
+            service.price = request.POST.get('price')
 
-            service.name = name
-            service.description = description
-            service.price = price
-            if image:
-                service.image = image
+            if 'delete_main_image' in request.POST:
+                service.image.delete()
+                service.image = None
+
+            if 'image' in request.FILES:
+                service.image = request.FILES['image']
+
             service.save()
 
+            # Handle deletion of additional images
+            images_to_delete = request.POST.getlist('delete_images')
+            ServiceImage.objects.filter(id__in=images_to_delete).delete()
+
+            # Handle deletion of videos
+            videos_to_delete = request.POST.getlist('delete_videos')
+            ServiceVideo.objects.filter(id__in=videos_to_delete).delete()
+
+            # Handle new additional images
+            for img in request.FILES.getlist('additional_images[]'):
+                ServiceImage.objects.create(service=service, image=img)
+
+            # Handle new videos
+            for vid in request.FILES.getlist('additional_videos[]'):
+                ServiceVideo.objects.create(service=service, video=vid)
+
+            messages.success(request, 'Service updated successfully.')
             return redirect('service_detail', business_slug=business.business_slug, service_slug=service.service_slug)
         else:
+            messages.error(request, 'You do not have permission to edit this service.')
             return redirect('service_detail', business_slug=business.business_slug, service_slug=service.service_slug)
     
-
-
 
 class CartView(LoginRequiredMixin, View):
     def get(self, request):
@@ -1368,10 +1495,6 @@ def user_messages_view(request):
     }
     return render(request, 'business/user_messages.html', context) 
 
-
-
-
-
 def events(request):
     events = Event.objects.all().select_related('organizer', 'country', 'state')
     countries = Country.objects.all()
@@ -1390,10 +1513,19 @@ def events(request):
     elif state_filter:
         events = events.filter(state__in=state_filter)
 
+    # Add saved status to each event
+    if request.user.is_authenticated:
+        saved_event_ids = request.user.saved_events.values_list('event_id', flat=True)
+        for event in events:
+            event.is_saved = event.id in saved_event_ids
+    else:
+        for event in events:
+            event.is_saved = False
+
     if request.is_ajax():
         event_data = [
             {
-                'id': event.id,  # Ensure ID is included
+                'id': event.id,
                 'title': event.title,
                 'description': event.description,
                 'country': event.country.name,
@@ -1402,6 +1534,7 @@ def events(request):
                 'location': event.location,
                 'banner_image': event.banner_image.url if event.banner_image else None,
                 'organizer_name': event.organizer.get_full_name(),
+                'is_saved': event.is_saved,
             }
             for event in events
         ]
@@ -1415,6 +1548,58 @@ def events(request):
         'selected_states': state_filter,
     }
     return render(request, 'business/events.html', context)
+
+@login_required
+def event_detail(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    is_organizer = request.user == event.organizer
+
+    # Use the correct related_name to access the reverse relationship
+    is_saved = event.saved_by.filter(user=request.user).exists()
+
+    # Debugging print statements
+    print(f"Event ID: {event_id}")
+    print(f"User: {request.user.username}")
+    print(f"Is Organizer: {is_organizer}")
+    print(f"Is Saved: {is_saved}")
+
+    context = {
+        'event': event,
+        'is_organizer': is_organizer,
+        'is_saved': is_saved,
+        'events': Event.objects.all()  # Assuming you want to show all events in the "Other Events" section
+    }
+
+    return render(request, 'business/event_detail.html', context)
+
+
+@login_required
+def save_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    saved_event, created = SavedEvent.objects.get_or_create(user=request.user, event=event)
+
+    if created:
+        messages.success(request, 'Event saved successfully.')
+        return JsonResponse({'status': 'saved'})
+    else:
+        saved_event.delete()
+        messages.success(request, 'Event removed successfully.')
+        return JsonResponse({'status': 'removed'})
+
+@login_required
+def saved_events(request):
+    saved_events = request.user.saved_events.select_related('event')
+    context = {
+        'saved_events': saved_events,
+    }
+    return render(request, 'business/saved_events.html', context)
+
+@login_required
+def remove_saved_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    saved_event = get_object_or_404(SavedEvent, user=request.user, event=event)
+    saved_event.delete()
+    return JsonResponse({'status': 'removed'}, status=200)
 
 
 @login_required
@@ -1492,17 +1677,6 @@ def edit_event(request, event_id):
     }
     return render(request, 'business/edit_event.html', context)
 
-
-@login_required
-def event_detail(request, event_id):
-    events = Event.objects.all()
-    event = get_object_or_404(Event, id=event_id)
-    is_organizer = request.user == event.organizer
-    return render(request, 'business/event_detail.html', {'event': event, 'events': events, 'is_organizer': is_organizer})
-
-
-
-
 def products(request):
     products = Product.objects.all()
 
@@ -1567,42 +1741,6 @@ def products(request):
     }
     
     return render(request, "business/products.html", context)
-
-
-
-def services(request):
-    services = Service.objects.all()
-    
-    # Get countries and states with their service counts
-    countries = Country.objects.annotate(
-        service_count=Count('business__services', distinct=True)
-    )
-    states = State.objects.annotate(
-        service_count=Count('business__services', distinct=True)
-    )
-
-    # Filtering
-    selected_countries = request.GET.getlist('country')
-    selected_states = request.GET.getlist('state')
-
-    if selected_countries:
-        services = services.filter(business__countries__id__in=selected_countries)
-    if selected_states:
-        services = services.filter(business__states__id__in=selected_states)
-
-    # Pagination
-    paginator = Paginator(services, 10)  # Show 10 services per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        "services": page_obj,
-        "countries": countries,
-        "states": states,
-        "selected_countries": selected_countries,
-        "selected_states": selected_states,
-    }
-    return render(request, "business/services.html", context)
 
 
 def search(request):

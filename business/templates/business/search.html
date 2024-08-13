@@ -40,15 +40,6 @@
         <div class="heading flex flex-col items-center">
             <div class="heading4 text-center">Found results for "<span class="result">{{ query }}</span>"</div>
             <div class="input-block lg:w-1/2 sm:w-3/5 w-full md:h-[52px] h-[44px] sm:mt-8 mt-5">
-                <div class='form-search w-full h-full relative'>
-                    <form action="{% url 'search' %}" method="get">
-                        <input name="q" type="text" placeholder='Search...' value="{{ query }}"
-                            class='caption1 w-full h-full pl-4 md:pr-[150px] pr-32 rounded-xl border border-line' />
-                        <button class='button-main absolute top-1 bottom-1 right-1 flex items-center justify-center'>
-                            search
-                        </button>
-                    </form>
-                </div>
             </div>
         </div>
 

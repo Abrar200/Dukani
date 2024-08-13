@@ -18,9 +18,27 @@ from django.conf import settings
 from django.utils.http import urlsafe_base64_encode
 import logging
 import smtplib
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 
 # Initialize the logger
 logger = logging.getLogger(__name__)
+
+
+import re
+
+def validate_password(password):
+    if len(password) < 12:
+        raise ValidationError("Password must be at least 12 characters long.")
+    if not re.search(r'[A-Z]', password):
+        raise ValidationError("Password must contain at least one uppercase letter.")
+    if not re.search(r'[a-z]', password):
+        raise ValidationError("Password must contain at least one lowercase letter.")
+    if not re.search(r'[0-9]', password):
+        raise ValidationError("Password must contain at least one number.")
+    if not re.search(r'[@$!%*#?&]', password):
+        raise ValidationError("Password must contain at least one special character (@$!%*#?&).")
+
 
 
 def user_register_view(request):
@@ -30,20 +48,42 @@ def user_register_view(request):
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
-        confirm_password = request.POST.get('confirmPassword')
-        print(f"{password} and {confirm_password}")
+        confirm_password = request.POST.get('confirm_password')
 
-        if password == confirm_password:
-            if CustomUser.objects.filter(username=username).exists():
-                messages.error(request, 'Username already exists.')
-            else:
-                user = CustomUser.objects.create_user(username=username, first_name=first_name, last_name=last_name, email=email, password=password)
-                messages.success(request, 'Registration successful. You can now log in.')
-                return redirect('login')
-        else:
+        if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
+            return render(request, 'users/user_registration.html')
+
+        # Validate password
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            messages.error(request, e.message)
+            return render(request, 'users/user_registration.html')
+
+        # Username validation
+        username_validator = RegexValidator(
+            regex=r'^[a-zA-Z0-9_.]+$',
+            message="Username can only contain letters, numbers, underscores, and periods."
+        )
+
+        try:
+            username_validator(username)
+        except ValidationError as e:
+            messages.error(request, e.message)
+            return render(request, 'users/user_registration.html')
+
+        if CustomUser.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists.')
+        elif CustomUser.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists.')
+        else:
+            user = CustomUser.objects.create_user(username=username, first_name=first_name, last_name=last_name, email=email, password=password)
+            messages.success(request, 'Registration successful. You can now log in.')
+            return redirect('login')
 
     return render(request, 'users/user_registration.html')
+
 
 def user_login_view(request):
     if request.method == 'POST':

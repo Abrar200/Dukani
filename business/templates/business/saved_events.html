@@ -1,0 +1,86 @@
+{% extends "business/base.html" %}
+
+{% block slider %}
+<div class="breadcrumb-block style-shared">
+    <div class="breadcrumb-main bg-linear overflow-hidden">
+        <div class="container lg:pt-[134px] pt-24 pb-10 relative">
+            <div class="main-content w-full h-full flex flex-col items-center justify-center relative z-[1]">
+                <div class="text-content">
+                    <div class="heading2 text-center">Saved Events</div>
+                    <div class="link flex items-center justify-center gap-1 caption1 mt-3">
+                        <a href='{% url "home" %}'>Homepage</a>
+                        <i class="ph ph-caret-right text-sm text-secondary2"></i>
+                        <div class='text-secondary2 capitalize'>Saved Events</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock slider %}
+
+{% block content %}
+<div class='blog list md:py-20 py-10'>
+    <div class="container">
+        <div class="heading2 text-center">Saved Events</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+            {% if saved_events %}
+                {% for saved_event in saved_events %}
+                <div class="event-card bg-white rounded-lg shadow-md overflow-hidden relative">
+                    <a href="{% url 'event_detail' saved_event.event.id %}" class="block">
+                        <img src="{{ saved_event.event.banner_image.url }}" alt="{{ saved_event.event.title }}" class="w-full h-40 object-cover">
+                        <div class="p-4">
+                            <h3 class="heading6 truncate">{{ saved_event.event.title }}</h3>
+                            <div class="text-sm text-gray-600 mt-2">
+                                <div class="flex items-center">
+                                    <i class="ph-calendar text-lg mr-2"></i>
+                                    <span>{{ saved_event.event.start_time|date:"F d, Y, g:i A" }}</span>
+                                </div>
+                                <div class="flex items-center mt-1">
+                                    <i class="ph-map-pin text-lg mr-2"></i>
+                                    <span class="truncate">{{ saved_event.event.location }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <button class="save-button absolute top-2 left-2 bg-white rounded-full p-2 shadow-md" data-event-id="{{ saved_event.event.id }}">
+                        <i class="fa fa-heart" style="color: #f41b17;" aria-hidden="true"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center">
+                    <p>You have not saved any events yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const saveButtons = document.querySelectorAll('.save-button');
+
+        saveButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const eventId = this.dataset.eventId;
+
+                fetch(`/save_event/${eventId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'saved' || data.status === 'removed') {
+                        window.location.reload(); // Redirect to the current page
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+</script>
+
+{% endblock content %}

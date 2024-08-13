@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
-<body>
+<body style="margin-top:0px">
     <div id="top-nav2" class='top-nav style-one bg-black md:h-[44px] h-[30px]'>
         <div class="container mx-auto h-full">
             <div class="top-nav-main flex justify-between max-md:justify-center h-full">
@@ -38,33 +38,50 @@
                     </div>
                 </div>
                 <div class="text-center text-button-uppercase text-white flex items-center">
-                    <ul class='flex items-center gap-8 h-full'>
+                    <ul class='flex items-center gap-8 h-full' style="font-size: 14px;">
                         <li class='h-full relative'>
                             <a href="{% url "community" %}"
-                                class='text-button-uppercase duration-300 h-full flex items-center justify-center gap-1'>
+                                class='text-button-uppercase duration-300 h-full flex items-center justify-center gap-1'
+                                style="white-space: nowrap;">
                                 List of Stores
                             </a>
                         </li>
                         <li class='h-full'>
-                            <a href="{% url 'events' %}"
+                            <a href="{% url "products" %}" 
                                 class='text-button-uppercase duration-300 h-full flex items-center justify-center'>
-                                Community Events
-                            </a>
-                        </li>
-                        <li class='h-full'>
-                            <a href="{% url "products" %}" class='text-button-uppercase duration-300 h-full flex
-                                items-center justify-center'>
                                 Products
                             </a>
                         </li>
                         <li class='h-full'>
-                            <a href="{% url "services" %}" class='text-button-uppercase duration-300 h-full flex
-                                items-center justify-center'>
+                            <a href="{% url "services" %}" 
+                                class='text-button-uppercase duration-300 h-full flex items-center justify-center'>
                                 Services
+                            </a>
+                        </li>
+                        <li class='h-full'>
+                            <a href="{% url 'events' %}"
+                                class='text-button-uppercase duration-300 h-full flex items-center justify-center'
+                                style="white-space: nowrap;">
+                                Events
                             </a>
                         </li>
                     </ul>
                 </div>
+                
+                <style>
+                    @media (max-width: 768px) {
+                        .text-button-uppercase ul {
+                            font-size: 12px !important;
+                            gap: 12px !important;
+                        }
+                    }
+                    @media (max-width: 640px) {
+                        .text-button-uppercase ul {
+                            font-size: 10px !important;
+                            gap: 8px !important;
+                        }
+                    }
+                </style>
                 <div class="right-content flex items-center gap-5 max-md:hidden">
                     <a href='https://www.facebook.com/' target='_blank'>
                         <i class="icon-facebook text-white"></i>
@@ -145,8 +162,7 @@
                                 <div class="user-icon flex items-center justify-center cursor-pointer relative">
                                     <i class="ph-bold ph-user text-2xl"></i>
                                     {% if business_order_count > 0 %}
-                                    <span
-                                        class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">{{ business_order_count }}</span>
+                                        <span class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">{{ business_order_count }}</span>
                                     {% endif %}
                                     <div class='login-popup absolute top-[74px] w-[320px] p-7 rounded-xl bg-white box-shadow-small'>
                                         <a href='{% url "profile" request.user.username %}' class="button-main w-full text-center">My Account</a>
@@ -155,11 +171,6 @@
                                                 <a href='{% url "business_detail" request.user.business.business_slug %}' class='text-black pl-1 hover:underline'>{{ request.user.business.business_name }}</a> {% if business_order_count > 0 %}
                                                 ({{ business_order_count }} orders not shipped)
                                                 {% endif %}
-                                            </div>
-                                        {% else %}
-                                            <div class="text-secondary text-center mt-3 pb-4">Become a Seller with Dukani
-                                                <a href='{% url "business_registration" %}' class='text-black pl-1 hover:underline'>Register your Business
-                                                </a>
                                             </div>
                                         {% endif %}
                                         <div class="bottom pt-4 border-t border-line"></div>
@@ -186,13 +197,16 @@
                             </div>
                         {% else %}
                             <div class="list-action flex items-center gap-4">
-                                <div class="user-icon flex items-center justify-center cursor-pointer">
+                                <div id="user-icon" class="user-icon flex items-center justify-center cursor-pointer">
                                     <i class="ph-bold ph-user text-2xl"></i>
-                                    <div
-                                        class='login-popup absolute top-[74px] w-[320px] p-7 rounded-xl bg-white box-shadow-small'>
+                                    <div id="login-popup" class='login-popup absolute top-[74px] w-[320px] p-7 rounded-xl bg-white box-shadow-small hidden'>
                                         <a href='{% url "login" %}' class="button-main w-full text-center">Login</a>
-                                        <div class="text-secondary text-center mt-3 pb-4">Don’t have an account?
+                                        <div class="text-secondary text-center mt-3 pb-4">Don't have an account?
                                             <a href='{% url "register" %}' class='text-black pl-1 hover:underline'>Register
+                                            </a>
+                                        </div>
+                                        <div class="text-secondary text-center pb-4">Become a Seller with Dukani
+                                            <a href='{% url "business_registration" %}' class='text-black pl-1 hover:underline'>Register your Business
                                             </a>
                                         </div>
                                         <div class="bottom pt-4 border-t border-line"></div>
@@ -200,29 +214,50 @@
                                     </div>
                                 </div>
                                 <div class="wishlist-icon">
-                                    <span
-                                        class="quantity wishlist-quantity absolute -right-1.5 -top-1.5 text-xs text-white"></span>
+                                    <span class="quantity wishlist-quantity absolute -right-1.5 -top-1.5 text-xs text-white"></span>
                                 </div>
                                 <div class="max-md:hidden cart-icon flex items-center relative cursor-pointer">
                                     <i class="ph-bold ph-handbag text-2xl"></i>
-                                    <span
-                                        class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">0</span>
+                                    <span class="quantity cart-quantity absolute -right-1.5 -top-1.5 text-xs text-white bg-black w-4 h-4 flex items-center justify-center rounded-full">0</span>
                                 </div>
                             </div>
+
+                            <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const userIcon = document.getElementById('user-icon');
+                                const loginPopup = document.getElementById('login-popup');
+
+                                // Show popup on page load for unauthenticated users
+                                loginPopup.classList.remove('hidden');
+
+                                // Toggle popup when user icon is clicked
+                                userIcon.addEventListener('click', function() {
+                                    loginPopup.classList.toggle('hidden');
+                                });
+
+                                // Close popup when clicking outside
+                                document.addEventListener('click', function(event) {
+                                    if (!userIcon.contains(event.target) && !loginPopup.contains(event.target)) {
+                                        loginPopup.classList.add('hidden');
+                                    }
+                                });
+                            });
+                            </script>
                         {% endif %}
+
                     </div>
                 </div>
             </div>
-            <div id="top-nav" class='top-nav style-one md:h-[44px] h-[30px]' style="background-color: transparent; transition: background-color 0.3s ease; margin-top: -10px;">
+            <div id="top-nav" class='top-nav style-one md:h-[44px] h-[30px]' style="background-color: transparent; transition: background-color 0.3s ease; margin-top: -10px; overflow-x: hidden;">
                 <div class="container mx-auto h-full">
                     <div class="top-nav-main flex justify-between max-md:justify-center h-full">
-                        <div class="text-center text-button-uppercase flex items-center">
-                            <ul class='flex items-center gap-8 h-full'>
+                        <div class="text-center text-button-uppercase flex items-center w-full">
+                            <ul class='flex items-center justify-between h-full w-full px-2' style="font-size: 14px; gap: 8px;">
                                 <li class='h-full relative'>
                                     <a href="{% url 'products' %}?category=CL"
-                                        class='text-button-uppercase duration-300 h-full flex items-center justify-center gap-1'
-                                        style="color: #333; transition: color 0.3s ease;">
-                                        CLOTHING
+                                        class='text-button-uppercase duration-300 h-full flex items-center justify-center'
+                                        style="color: #333; transition: color 0.3s ease; white-space: nowrap;">
+                                        <span class="md:inline hidden">CLOTHING</span>
                                     </a>
                                 </li>
                                 <li class='h-full'>
@@ -249,8 +284,8 @@
                                 <li class='h-full'>
                                     <a href="{% url 'products' %}?category=EL" 
                                         class='text-button-uppercase duration-300 h-full flex items-center justify-center'
-                                        style="color: #333; transition: color 0.3s ease;">
-                                        ELECTRONICS
+                                        style="color: #333; transition: color 0.3s ease; white-space: nowrap;">
+                                        <span class="md:inline hidden">ELECTRONICS</span>
                                     </a>
                                 </li>
                             </ul>
@@ -258,6 +293,21 @@
                     </div>
                 </div>
             </div>
+            
+            <style>
+                @media (max-width: 768px) {
+                    #top-nav ul {
+                        font-size: 12px;
+                        gap: 4px;
+                    }
+                }
+                @media (max-width: 640px) {
+                    #top-nav ul {
+                        font-size: 10px;
+                        gap: 2px;
+                    }
+                }
+            </style>
         </div>
 
 
@@ -303,15 +353,15 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href='{% url "events" %}' class='text-xl font-semibold flex items-center justify-between'>Community Events
-                                    </a>
-                                </li>
-                                <li>
                                     <a href='{% url "products" %}' class='text-xl font-semibold flex items-center justify-between'>Products
                                     </a>
                                 </li>
                                 <li>
                                     <a href='{% url "services" %}' class='text-xl font-semibold flex items-center justify-between'>Services
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href='{% url "events" %}' class='text-xl font-semibold flex items-center justify-between'>Events
                                     </a>
                                 </li>
                             </ul>

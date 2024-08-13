@@ -1,9 +1,7 @@
 {% extends "business/base.html" %}
-
 {% load static %}
 
 {% block slider %}
-
 <div class="breadcrumb-block style-shared">
     <div class="breadcrumb-main bg-linear overflow-hidden">
         <div class="container lg:pt-[134px] pt-24 pb-10 relative">
@@ -20,69 +18,119 @@
         </div>
     </div>
 </div>
-
 {% endblock slider %}
 
-{% if messages %}
-<div class="container mt-3">
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}" role="alert">
-            {{ message }}
-        </div>
-    {% endfor %}
-</div>
-{% endif %}
-
 {% block content %}
-
-<div class='contact-us md:py-20 py-10'>
+<div class="contact-us md:py-20 py-10">
     <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <div class="flex justify-between max-lg:flex-col gap-y-10">
             <div class="left lg:w-2/3 lg:pr-4">
-                <div class="heading3">Edit Service</div>
-                <div class="body1 text-secondary2 mt-3">{{ product.name }}</div>
+                <div class="heading3">Edit Service: {{ service.name }}</div>
                 <form class="md:mt-6 mt-4" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class='grid sm:grid-cols-2 grid-cols-1 gap-4 gap-y-5'>
                         <div class="name">
                             <input class="border-line px-4 py-3 w-full rounded-lg" id="service_name" type="text" name="name" placeholder="Service Name *" value="{{ service.name }}" required />
                         </div>
+                        
                         <div class="price">
                             <input class="border-line px-4 py-3 w-full rounded-lg" id="service_price" type="number" step="0.01" name="price" placeholder="Service Price *" value="{{ service.price }}" required />
                         </div>
-                        <div class="image">
-                            <label>Service Image</label>
-                            <input class="border-line px-4 py-3 w-full rounded-lg" id="service_image" type="file" name="image" accept="image/*" />
-                            {% if service.image %}
-                            <img src="{{ service.image.url }}" alt="{{ service.name }}" class="mt-2 w-32 h-32 object-cover rounded-lg">
-                            {% endif %}
-                        </div>
+
                         <div class="message sm:col-span-2">
                             <textarea class="border-line px-4 pt-3 pb-3 w-full rounded-lg" id="service_description" name="description" rows="3" placeholder="Service Description *" required>{{ service.description }}</textarea>
                         </div>
+
+                        <div class="image">
+                            <label>Main Service Image</label>
+                            {% if service.image %}
+                                <img src="{{ service.image.url }}" alt="Current main image" style="max-width: 200px; max-height: 200px;">
+                                <input type="checkbox" name="delete_main_image" id="delete_main_image">
+                                <label for="delete_main_image">Delete main image</label>
+                            {% endif %}
+                            <input class="border-line px-4 py-3 w-full rounded-lg" id="service_image" type="file" name="image" accept="image/*" />
+                        </div>
+
+                        <div id="existing-images" class="col-span-full">
+                            <h4>Existing Additional Images</h4>
+                            {% for image in service.additional_images.all %}
+                                <div class="existing-image">
+                                    <img src="{{ image.image.url }}" alt="Additional image" style="max-width: 100px; max-height: 100px;">
+                                    <input type="checkbox" name="delete_images" value="{{ image.id }}" id="delete_image_{{ image.id }}">
+                                    <label for="delete_image_{{ image.id }}">Delete this image</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div id="additional-images" class="col-span-full"></div>
+                        <button type="button" id="add-image-button" class="button-main bg-white text-black border border-black mt-3">Add Another Image</button>
+
+                        <div id="existing-videos" class="col-span-full">
+                            <h4>Existing Videos</h4>
+                            {% for video in service.videos.all %}
+                                <div class="existing-video">
+                                    <video width="200" controls>
+                                        <source src="{{ video.video.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <input type="checkbox" name="delete_videos" value="{{ video.id }}" id="delete_video_{{ video.id }}">
+                                    <label for="delete_video_{{ video.id }}">Delete this video</label>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div id="additional-videos" class="col-span-full mt-3"></div>
+                        <button type="button" id="add-video-button" class="button-main bg-white text-black border border-black mt-3">Add Another Video</button>
                     </div>
+
                     <div class="block-button md:mt-6 mt-4">
                         <button type="submit" class="quick-view-btn button-main sm:py-3 py-2 sm:px-5 px-4 bg-black hover:bg-green text-white rounded-full whitespace-nowrap">Update Service</button>
                     </div>
                 </form>
-                
-            </div>
-            <div class="right lg:w-1/4 lg:pl-4">
-                <div class="item">
-                    <div class="heading4">{{ business.business_name }}</div>
-                    <p class="mt-3">{{ business.address }}</p>
-                    <p class="mt-3">Phone: <span class='whitespace-nowrap'>{{ business.phone }}</span></p>
-                    <p class="mt-1">Email: <span class='whitespace-nowrap'>{{ business.email }}</span></p>
-                </div>
-                <div class="item mt-10">
-                    <div class="heading4">Open Hours</div>
-                    {% for opening_hour in opening_hours %}
-                    <p class="mt-3">{{ opening_hour.get_day_display }}: {% if opening_hour.is_closed %}<span class='whitespace-nowrap'>Closed</span>{% else %}{% with opening_time=opening_hour.opening_time|time:"g:ia" closing_time=opening_hour.closing_time|time:"g:ia" %}<span class='whitespace-nowrap'>{{ opening_time }} - {{ closing_time }}</span>{% endwith %}{% endif %}</p>
-                    {% endfor %}
-                </div>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addImageButton = document.getElementById('add-image-button');
+        const additionalImages = document.getElementById('additional-images');
+        const addVideoButton = document.getElementById('add-video-button');
+        const additionalVideos = document.getElementById('additional-videos');
+
+        let imageCount = 0;
+        let videoCount = 0;
+
+        addImageButton.addEventListener('click', function() {
+            imageCount++;
+            const newImageInput = document.createElement('div');
+            newImageInput.classList.add('mt-3');
+            newImageInput.innerHTML = `
+                <label>Additional Image ${imageCount}</label>
+                <input class="border-line px-4 py-3 w-full rounded-lg" type="file" name="additional_images[]" accept="image/*" />
+            `;
+            additionalImages.appendChild(newImageInput);
+        });
+
+        addVideoButton.addEventListener('click', function() {
+            videoCount++;
+            const newVideoInput = document.createElement('div');
+            newVideoInput.classList.add('mt-3');
+            newVideoInput.innerHTML = `
+                <label>Additional Video ${videoCount}</label>
+                <input class="border-line px-4 py-3 w-full rounded-lg" type="file" name="additional_videos[]" accept="video/*" />
+            `;
+            additionalVideos.appendChild(newVideoInput);
+        });
+    });
+</script>
 {% endblock content %}

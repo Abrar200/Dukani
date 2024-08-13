@@ -22,3 +22,21 @@ def subtract_from(value, arg):
 @register.filter
 def times(value):
     return range(int(value))
+
+@register.filter
+def to(value, arg):
+    """
+    Returns a range from value to arg.
+    Ensures that value and arg are integers before creating the range.
+    """
+    value = int(value)
+    arg = int(arg)
+    return range(value, arg)
+
+@register.filter
+def subtract(value, arg):
+    """Subtracts arg from value, ensuring both are integers."""
+    try:
+        return int(value) - int(arg)
+    except (ValueError, TypeError):
+        return ''

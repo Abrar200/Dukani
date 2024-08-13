@@ -7,7 +7,9 @@ from django.utils import timezone
 from django.db.models import Avg, Count
 from django.db.models import JSONField
 from django.utils.translation import gettext_lazy as _
-
+from django.core.validators import RegexValidator, MinLengthValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class Country(models.Model):
     name = models.CharField(max_length=300)
@@ -16,13 +18,15 @@ class Country(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class State(models.Model):
     name = models.CharField(max_length=100)
     abbreviation = models.CharField(max_length=3)
 
     def __str__(self):
         return self.name
+
 
 class Business(models.Model):
     BUSINESS_TYPE_CHOICES = [
@@ -38,12 +42,12 @@ class Business(models.Model):
     states = models.ManyToManyField(State)
     address = models.CharField(max_length=200)
     phone = models.CharField(max_length=20)
-    website = models.URLField(blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='business_profiles/', blank=True, null=True)
-    banner_image = models.ImageField(upload_to='business_banners/', blank=True, null=True)
+    website = models.URLField(default='www.website.com')
+    email = models.EmailField(default='name@email.com')
+    profile_picture = models.ImageField(upload_to='business_profiles/', default='business_profiles/1.jpg')
+    banner_image = models.ImageField(upload_to='business_banners/', default='business_profiles/1.jpg')
     is_featured = models.BooleanField(default=False)
-    stripe_account_id = models.CharField(max_length=255, blank=True, null=True)  # Add this line
+    stripe_account_id = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.business_name
@@ -76,9 +80,11 @@ class OpeningHour(models.Model):
             return f"{self.business.business_name} - {self.get_day_display()} (Closed)"
         else:
             return f"{self.business.business_name} - {self.get_day_display()} ({self.opening_time} - {self.closing_time})"
+
+    def clean(self):
+        if not self.is_closed and (not self.opening_time or not self.closing_time):
+            raise ValidationError("You must either select both opening and closing hours or mark the day as closed.")
     
-
-
 
 class Product(models.Model):
     class Category(models.TextChoices):
@@ -215,7 +221,6 @@ class CartItemVariation(models.Model):
     def __str__(self):
         return f"{self.cart} - {self.product_variation}"
 
-
 class Service(models.Model):
     name = models.CharField(max_length=100)
     service_slug = models.SlugField(unique=True, blank=True)
@@ -232,7 +237,39 @@ class Service(models.Model):
             self.service_slug = slugify(self.name)
         super().save(*args, **kwargs)
 
+    @property
+    def overall_review(self):
+        avg_rating = self.reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(avg_rating, 1) if avg_rating else 0
 
+    def star_rating_percentage(self, star):
+        total_reviews = self.reviews.count()
+        if total_reviews == 0:
+            return 0
+        star_count = self.reviews.filter(rating=star).count()
+        return round((star_count / total_reviews) * 100)
+
+class ServiceImage(models.Model):
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='additional_images', default="1")
+    image = models.ImageField(upload_to='services/additional_images/')
+
+class ServiceVideo(models.Model):
+    service = models.ForeignKey(Service, related_name='videos', on_delete=models.CASCADE)
+    video = models.FileField(upload_to='services/videos/')
+
+class ServiceReview(models.Model):
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    review_text = models.TextField()
+    rating = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Review by {self.user.username} on {self.service.name}'
+
+    @property
+    def date(self):
+        return (timezone.now() - self.created_at).days
 
 class Order(models.Model):
     ORDER_STATUS_CHOICES = [
@@ -299,7 +336,6 @@ class Message(models.Model):
 
     
 
-
 class Event(models.Model):
     organizer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='organized_events')
     title = models.CharField(max_length=200)
@@ -314,3 +350,16 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
+    
+
+class SavedEvent(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='saved_events')
+    event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='saved_by')
+    saved_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'event')
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.event.title}"
+
