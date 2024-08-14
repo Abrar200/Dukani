@@ -59,7 +59,6 @@ INSTALLED_APPS = [
     'business.apps.BusinessConfig',
     'users.apps.UsersConfig',
     'bootstrap5',
-    'pyspark',
 ]
 
 MIDDLEWARE = [

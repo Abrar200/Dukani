@@ -778,8 +778,6 @@ def services(request):
     }
     return render(request, "business/services.html", context)
 
-from pyspark.sql.functions import *
-from pyspark.sql.types import *
 from django.db.models import Avg
 
 def service_detail(request, business_slug, service_slug):
